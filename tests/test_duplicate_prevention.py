@@ -84,3 +84,52 @@ def test_valid_presentation_attachment():
     mime_part = handler.create_mime_attachment()
     assert mime_part is not None
     assert mime_part.get_content_type() == "application/octet-stream"
+
+
+def test_historical_windows_attachment_path_resolution():
+    """Regression test: historical Windows absolute paths resolve to current deployed asset file."""
+    windows_path = r"C:\Users\LENOVO\Desktop\export-automation\assets\company_presentation.pdf"
+    handler = AttachmentHandler(windows_path)
+    is_valid, msg = handler.validate()
+
+    assert is_valid is True
+    assert handler.resolved_path.exists()
+    assert handler.resolved_path.name == "company_presentation.pdf"
+
+    # Stale paths from other historical machines/directories
+    other_machine_path = r"C:\Users\OtherDeveloper\Workspace\assets\company_presentation.pdf"
+    other_handler = AttachmentHandler(other_machine_path)
+    assert other_handler.validate()[0] is True
+    assert other_handler.resolved_path.exists()
+
+
+def test_cross_platform_nonexistent_drive_path_resolution():
+    """Regression test: unknown or non-existent Windows drive paths resolve cleanly to deployed presentation."""
+    stale_drive_path = r"Z:\invalid_render_volume\assets\company_presentation.pdf"
+    resolved = AttachmentHandler.resolve_attachment_path(stale_drive_path)
+
+    assert resolved.exists()
+    assert resolved.name == "company_presentation.pdf"
+    assert "Z:" not in resolved.name
+
+
+def test_campaign_from_dict_normalizes_historical_attachment_path():
+    """Regression test: Campaign deserialization normalizes stale Windows attachment paths."""
+    from outreach.campaign_model import Campaign
+
+    data = {
+        "campaign_id": "camp_test_regression_123",
+        "target_audience": "business",
+        "subject": "Test Inquiry",
+        "body_template": "Hello {{company_name}}",
+        "attachment_path": r"C:\Users\LENOVO\Desktop\export-automation\assets\company_presentation.pdf",
+        "status": "APPROVED",
+    }
+
+    camp = Campaign.from_dict(data)
+    handler = AttachmentHandler(camp.attachment_path)
+    is_valid, msg = handler.validate()
+
+    assert is_valid is True
+    assert Path(camp.attachment_path).exists()
+    assert Path(camp.attachment_path).name == "company_presentation.pdf"

@@ -140,16 +140,21 @@ class Campaign:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Campaign":
-        """Instantiate Campaign from dictionary."""
+        """Instantiate Campaign from dictionary, normalizing historical or cross-platform attachment paths."""
+        from .attachment_handler import AttachmentHandler
+
         status_val = data.get("status", CampaignStatus.DRAFT.value)
         status_enum = CampaignStatus(status_val) if status_val in CampaignStatus._value2member_map_ else CampaignStatus.DRAFT
+
+        raw_attachment = data.get("attachment_path") or Config.PRESENTATION_PATH
+        resolved_attachment = str(AttachmentHandler.resolve_attachment_path(raw_attachment))
 
         return cls(
             campaign_id=data.get("campaign_id", ""),
             target_audience=data.get("target_audience", "business"),
             subject=data.get("subject", ""),
             body_template=data.get("body_template", ""),
-            attachment_path=data.get("attachment_path", Config.PRESENTATION_PATH),
+            attachment_path=resolved_attachment,
             created_at=data.get("created_at", datetime.now(timezone.utc).isoformat()),
             total_recipients=int(data.get("total_recipients", 0)),
             eligible_recipients=int(data.get("eligible_recipients", 0)),
