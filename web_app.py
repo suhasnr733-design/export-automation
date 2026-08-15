@@ -57,8 +57,8 @@ from validation.email_validator import (
 )
 from classification import run_classification_pipeline
 from outreach.campaign_model import CampaignStatus, CampaignStore, Campaign
-from outreach.campaign_manager import CampaignManager
-from outreach.attachment_handler import AttachmentHandler
+from outreach.campaign_manager import CampaignManager, CampaignStateError
+from outreach.attachment_handler import AttachmentHandler, AttachmentError
 from outreach.personalization import PersonalizationEngine
 from reports.report_generator import ReportGenerator
 
@@ -731,7 +731,7 @@ def create_campaign_action():
 
 @app.route("/campaign/approve/<campaign_id>", methods=["POST"])
 def approve_campaign_action(campaign_id: str):
-    """Execute approval gate action for a campaign."""
+    """Execute approval gate action for a campaign with backend attachment validation."""
     try:
         manager = CampaignManager(
             data_dir=Config.DATA_DIR,
@@ -741,6 +741,9 @@ def approve_campaign_action(campaign_id: str):
         campaign = manager.approve_campaign(campaign_id)
         flash(f"Campaign '{campaign.campaign_id}' has been APPROVED for execution.", "success")
         return redirect(url_for("campaign_send_view", campaign_id=campaign.campaign_id))
+    except (AttachmentError, CampaignStateError, ValueError) as e:
+        flash(str(e), "error")
+        return redirect(url_for("campaign_send_view", campaign_id=campaign_id))
     except Exception as e:
         flash(f"Approval failed: {str(e)}", "error")
         return redirect(url_for("campaign_send_view", campaign_id=campaign_id))
@@ -748,7 +751,7 @@ def approve_campaign_action(campaign_id: str):
 
 @app.route("/campaign/execute/<campaign_id>", methods=["POST"])
 def execute_campaign_action(campaign_id: str):
-    """Execute an approved campaign in TEST_MODE (or Live with confirmation)."""
+    """Execute an approved campaign in TEST_MODE (or Live with confirmation) with backend attachment validation."""
     try:
         manager = CampaignManager(
             data_dir=Config.DATA_DIR,
@@ -765,6 +768,9 @@ def execute_campaign_action(campaign_id: str):
             "success"
         )
         return redirect(url_for("campaign_detail", campaign_id=campaign_id))
+    except (AttachmentError, CampaignStateError, ValueError) as e:
+        flash(str(e), "error")
+        return redirect(url_for("campaign_send_view", campaign_id=campaign_id))
     except Exception as e:
         flash(f"Execution failed: {str(e)}", "error")
         return redirect(url_for("campaign_send_view", campaign_id=campaign_id))

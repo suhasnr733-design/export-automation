@@ -187,18 +187,75 @@ def test_attachment_validation(test_env):
     assert meta["extension"] == ".pdf"
 
 
-# 9. Missing attachment blocks campaign
-def test_missing_attachment_blocks_campaign(test_env):
-    """Verify campaign execution raises AttachmentError if attachment file is missing."""
+# 9. Attachment Safety Gate Tests
+def test_preview_generation_allowed_with_missing_attachment(test_env):
+    """Verify preview generation succeeds and creates candidate previews even when attachment is missing."""
     mgr = CampaignManager(
         data_dir=test_env["data_dir"],
-        attachment_path=str(test_env["assets_dir"] / "non_existent_file.pdf"),
+        attachment_path=str(test_env["assets_dir"] / "test_missing.pdf"),
+    )
+    campaign, previews = mgr.prepare_campaign(target_audience="business")
+
+    assert campaign is not None
+    assert campaign.status == CampaignStatus.READY_FOR_REVIEW
+    assert len(previews) > 0
+    assert campaign.eligible_recipients > 0
+
+
+def test_missing_attachment_blocks_campaign_approval(test_env):
+    """Verify campaign approval is strictly blocked with AttachmentError when attachment file is missing."""
+    mgr = CampaignManager(
+        data_dir=test_env["data_dir"],
+        attachment_path=str(test_env["assets_dir"] / "test_missing.pdf"),
+    )
+    campaign, _ = mgr.prepare_campaign(target_audience="business")
+
+    with pytest.raises(AttachmentError) as exc_info:
+        mgr.approve_campaign(campaign.campaign_id)
+    assert "Campaign approval blocked: attachment validation failed" in str(exc_info.value)
+
+
+def test_missing_attachment_blocks_campaign_execution(test_env):
+    """Verify campaign execution is strictly blocked with AttachmentError if attachment file is missing at runtime."""
+    # First prepare and approve with a valid presentation
+    mgr = CampaignManager(
+        data_dir=test_env["data_dir"],
+        attachment_path=str(test_env["presentation_file"]),
     )
     campaign, _ = mgr.prepare_campaign(target_audience="business")
     mgr.approve_campaign(campaign.campaign_id)
 
-    with pytest.raises(AttachmentError):
-        mgr.execute_campaign(campaign_id=campaign.campaign_id, force_test_mode=True)
+    # Now simulate the configured attachment becoming missing before execution
+    mgr_missing = CampaignManager(
+        data_dir=test_env["data_dir"],
+        attachment_path=str(test_env["assets_dir"] / "non_existent_file.pdf"),
+    )
+    with pytest.raises(AttachmentError) as exc_info:
+        mgr_missing.execute_campaign(campaign_id=campaign.campaign_id, force_test_mode=True)
+    assert "Campaign execution blocked: attachment validation failed" in str(exc_info.value)
+
+    # Verify campaign was marked as FAILED in datastore
+    reloaded = CampaignStore.get_campaign(campaign.campaign_id, file_path=test_env["data_dir"] / "campaigns.json")
+    assert reloaded.status == CampaignStatus.FAILED
+
+
+def test_valid_attachment_allows_approval_and_execution(test_env):
+    """Verify valid attachment allows full lifecycle: preview -> approval -> execution."""
+    mgr = CampaignManager(
+        data_dir=test_env["data_dir"],
+        attachment_path=str(test_env["presentation_file"]),
+    )
+    campaign, previews = mgr.prepare_campaign(target_audience="business")
+    assert campaign.status == CampaignStatus.READY_FOR_REVIEW
+
+    approved = mgr.approve_campaign(campaign.campaign_id)
+    assert approved.status == CampaignStatus.APPROVED
+
+    summary = mgr.execute_campaign(campaign_id=campaign.campaign_id, force_test_mode=True)
+    assert summary["successful_sends"] > 0
+    reloaded = CampaignStore.get_campaign(campaign.campaign_id, file_path=test_env["data_dir"] / "campaigns.json")
+    assert reloaded.status == CampaignStatus.COMPLETED
+
 
 
 # 10. Duplicate recipient blocking

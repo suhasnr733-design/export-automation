@@ -122,13 +122,25 @@
       </span>
 
       {% if active_campaign.status.value in ('DRAFT', 'READY_FOR_REVIEW') %}
-        <button type="button" onclick="openModal('approvalModal')" class="btn btn-warning">
-          ✓ Approve Campaign Gate
-        </button>
+        {% if not attachment_meta.is_valid %}
+          <button type="button" class="btn btn-warning" disabled style="opacity:0.5; cursor:not-allowed;" title="Campaign approval blocked: attachment validation failed.">
+            🚫 Approval Blocked (No Attachment)
+          </button>
+        {% else %}
+          <button type="button" onclick="openModal('approvalModal')" class="btn btn-warning">
+            ✓ Approve Campaign Gate
+          </button>
+        {% endif %}
       {% elif active_campaign.status.value == 'APPROVED' %}
-        <button type="button" onclick="openModal('executeModal')" class="btn btn-success">
-          {% if config_data.TEST_MODE %}▶ Run Test Campaign{% else %}▶ Dispatch Live Campaign{% endif %}
-        </button>
+        {% if not attachment_meta.is_valid %}
+          <button type="button" class="btn btn-success" disabled style="opacity:0.5; cursor:not-allowed;" title="Campaign execution blocked: attachment validation failed.">
+            🚫 Execution Blocked (No Attachment)
+          </button>
+        {% else %}
+          <button type="button" onclick="openModal('executeModal')" class="btn btn-success">
+            {% if config_data.TEST_MODE %}▶ Run Test Campaign{% else %}▶ Dispatch Live Campaign{% endif %}
+          </button>
+        {% endif %}
       {% elif active_campaign.status.value == 'COMPLETED' %}
         <a href="{{ url_for('campaign_detail', campaign_id=active_campaign.campaign_id) }}" class="btn btn-secondary">
           📊 View Execution Report

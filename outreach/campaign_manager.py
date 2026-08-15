@@ -394,12 +394,22 @@ class CampaignManager:
         """
         Execute approval action for a specified campaign ID.
         Transitions campaign from READY_FOR_REVIEW -> APPROVED.
+        Enforces a hard attachment safety gate before allowing approval.
         """
         campaign = CampaignStore.get_campaign(campaign_id, file_path=self.campaigns_file)
         if not campaign:
             raise ValueError(f"Campaign with ID '{campaign_id}' not found in datastore.")
 
+        # Hard attachment safety gate: validate current configured attachment before allowing approval
+        att_path = self.attachment_path or Config.PRESENTATION_PATH
+        att_handler = AttachmentHandler(att_path)
+        att_valid, att_msg = att_handler.validate()
+        if not att_valid:
+            logger.error(f"Campaign approval blocked for '{campaign_id}': attachment validation failed ({att_msg})")
+            raise AttachmentError(f"Campaign approval blocked: attachment validation failed: {att_msg}")
+
         campaign.approve()
+        campaign.attachment_path = str(att_handler.resolved_path)
         CampaignStore.save_campaign(campaign, file_path=self.campaigns_file)
         return campaign
 
@@ -446,13 +456,18 @@ class CampaignManager:
                 "Only APPROVED campaigns can be executed."
             )
 
-        # 3. Attachment Validation Check (STOP IF MISSING)
-        handler = AttachmentHandler(campaign.attachment_path)
+        # 3. Independent Attachment Validation Check immediately before execution
+        # Always validate against current configured PRESENTATION_PATH rather than trusting stored path
+        current_att_path = self.attachment_path or Config.PRESENTATION_PATH
+        handler = AttachmentHandler(current_att_path)
         att_valid, att_msg = handler.validate()
         if not att_valid:
-            campaign.mark_failed(f"Attachment validation failed: {att_msg}")
+            campaign.mark_failed(f"Campaign execution blocked: attachment validation failed: {att_msg}")
             CampaignStore.save_campaign(campaign, file_path=self.campaigns_file)
-            raise AttachmentError(f"Campaign execution aborted! {att_msg}")
+            raise AttachmentError(f"Campaign execution blocked: attachment validation failed: {att_msg}")
+
+        # Synchronize campaign attachment path with validated active path
+        campaign.attachment_path = str(handler.resolved_path)
 
         # 4. Mark Running
         campaign.mark_running()

@@ -328,3 +328,63 @@ def test_web_app_import_no_logging_collision():
     assert hasattr(app_logging, "logger")
     assert hasattr(app_logging.activity_logger, "init_data_stores")
 
+
+# ==============================================================================
+# 8. Attachment Safety Gate Web Route Tests
+# ==============================================================================
+def test_web_app_blocks_approval_when_attachment_missing(client: FlaskClient, tmp_path, monkeypatch):
+    """Verify POST /campaign/approve/<id> blocks approval when configured attachment is missing."""
+    data_dir = tmp_path / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    campaigns_file = data_dir / "campaigns.json"
+
+    monkeypatch.setattr(Config, "DATA_DIR", data_dir)
+    monkeypatch.setattr(Config, "CAMPAIGNS_FILE", campaigns_file)
+    monkeypatch.setattr(Config, "PRESENTATION_PATH", "assets/test_missing_unreal_file.pdf")
+
+    # Create a draft campaign
+    camp = Campaign.create_new(
+        target_audience="business",
+        body_template="Hello {{company_name}}",
+        attachment_path="assets/test_missing_unreal_file.pdf",
+    )
+    CampaignStore.save_campaign(camp, file_path=campaigns_file)
+
+    resp = client.post(f"/campaign/approve/{camp.campaign_id}", follow_redirects=True)
+    assert resp.status_code == 200
+    body = resp.data.decode("utf-8")
+    assert "Campaign approval blocked: attachment validation failed" in body
+
+    # Verify campaign was NOT approved in store
+    loaded = CampaignStore.get_campaign(camp.campaign_id, file_path=campaigns_file)
+    assert loaded.status != CampaignStatus.APPROVED
+    assert loaded.status in (CampaignStatus.DRAFT, CampaignStatus.READY_FOR_REVIEW)
+
+
+def test_web_app_blocks_execution_when_attachment_missing(client: FlaskClient, tmp_path, monkeypatch):
+    """Verify POST /campaign/execute/<id> blocks execution when configured attachment is missing."""
+    data_dir = tmp_path / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    campaigns_file = data_dir / "campaigns.json"
+
+    monkeypatch.setattr(Config, "DATA_DIR", data_dir)
+    monkeypatch.setattr(Config, "CAMPAIGNS_FILE", campaigns_file)
+    monkeypatch.setattr(Config, "PRESENTATION_PATH", "assets/test_missing_unreal_file.pdf")
+
+    # Create an approved campaign
+    camp = Campaign.create_new(
+        target_audience="business",
+        body_template="Hello {{company_name}}",
+        attachment_path="assets/test_missing_unreal_file.pdf",
+    )
+    camp.status = CampaignStatus.APPROVED
+    CampaignStore.save_campaign(camp, file_path=campaigns_file)
+
+    resp = client.post(f"/campaign/execute/{camp.campaign_id}", follow_redirects=True)
+    assert resp.status_code == 200
+    body = resp.data.decode("utf-8")
+    assert "Campaign execution blocked: attachment validation failed" in body
+
+    # Verify campaign is now marked FAILED
+    loaded = CampaignStore.get_campaign(camp.campaign_id, file_path=campaigns_file)
+    assert loaded.status == CampaignStatus.FAILED
