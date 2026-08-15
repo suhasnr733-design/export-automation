@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Export Sales Pipeline Dashboard</h1>
+    <p class="page-subtitle">Real-time metrics, buyer intelligence, and international outreach campaign status.</p>
+  </div>
+  <div style="display: flex; gap: 10px;">
+    <a href="{{ url_for('classify_view') }}" class="btn btn-secondary">🤖 AI Classify</a>
+    <a href="{{ url_for('review_view') }}" class="btn btn-secondary" style="border-color:#8b5cf6; color:#c4b5fd;">🛡️ Review Leads</a>
+    <a href="{{ url_for('campaign_send_view') }}" class="btn btn-primary">✉️ Prepare Campaign</a>
+  </div>
+</div>
+
+<!-- KPI Cards Grid -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-header">
+      <span class="kpi-label">Total Buyers</span>
+      <span class="kpi-icon">👥</span>
+    </div>
+    <div class="kpi-value">{{ buyers_audit.total_records }}</div>
+    <div class="kpi-subtext">Verified in data/buyers.csv</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-header">
+      <span class="kpi-label">Valid Emails</span>
+      <span class="kpi-icon">✓</span>
+    </div>
+    <div class="kpi-value">{{ buyers_audit.unique_emails }}</div>
+    <div class="kpi-subtext">{{ buyers_audit.duplicate_emails }} duplicates filtered</div>
+  </div>
+
+  <div class="kpi-card biz">
+    <div class="kpi-header">
+      <span class="kpi-label">Business (B2B)</span>
+      <span class="kpi-icon">🏢</span>
+    </div>
+    <div class="kpi-value">{{ classified_emails.business|length }}</div>
+    <div class="kpi-subtext">Wholesale & buying desks</div>
+  </div>
+
+  <div class="kpi-card ind">
+    <div class="kpi-header">
+      <span class="kpi-label">Individual</span>
+      <span class="kpi-icon">👤</span>
+    </div>
+    <div class="kpi-value">{{ classified_emails.individual|length }}</div>
+    <div class="kpi-subtext">Independent practitioners</div>
+  </div>
+
+  <div class="kpi-card camp">
+    <div class="kpi-header">
+      <span class="kpi-label">Campaigns</span>
+      <span class="kpi-icon">📋</span>
+    </div>
+    <div class="kpi-value">{{ campaigns|length }}</div>
+    <div class="kpi-subtext">Structured outreach batches</div>
+  </div>
+
+  <div class="kpi-card test">
+    <div class="kpi-header">
+      <span class="kpi-label">Test Sends</span>
+      <span class="kpi-icon">🟡</span>
+    </div>
+    <div class="kpi-value">{{ sent_audit.test_mode_records }}</div>
+    <div class="kpi-subtext">Safe simulations logged</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-header">
+      <span class="kpi-label">Live Sends</span>
+      <span class="kpi-icon">🟢</span>
+    </div>
+    <div class="kpi-value">{{ sent_audit.successful_sends }}</div>
+    <div class="kpi-subtext">Real Gmail deliveries</div>
+  </div>
+
+  <div class="kpi-card fail">
+    <div class="kpi-header">
+      <span class="kpi-label">Failed / Errs</span>
+      <span class="kpi-icon">⚠️</span>
+    </div>
+    <div class="kpi-value">{{ sent_audit.failed_sends }}</div>
+    <div class="kpi-subtext">Delivery errors caught</div>
+  </div>
+</div>
+
+<!-- 2-Column Analytics Overview -->
+<div class="grid-2">
+  
+  <!-- Left Card: Country & Source Breakdown -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">🌍 International Audience Breakdown</h2>
+      <span class="card-subtitle">{{ buyers_audit.total_records }} Discovered Leads</span>
+    </div>
+
+    <h3 style="font-size:0.9rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:12px;">Top Buyer Countries</h3>
+    {% if country_dist %}
+      {% for country, count in country_dist.items() %}
+      <div class="progress-container">
+        <div class="progress-header">
+          <span>{{ country }}</span>
+          <span style="color:#ffffff; font-weight:600;">{{ count }} buyers</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width: {{ (count / buyers_audit.total_records * 100)|round }}%;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color:var(--text-muted); font-size:0.85rem;">No country distribution data recorded.</p>
+    {% endif %}
+
+    <h3 style="font-size:0.9rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin:24px 0 12px 0;">Discovery Sources</h3>
+    {% for source, count in buyers_audit.platform_distribution.items() %}
+    <div class="progress-container">
+      <div class="progress-header">
+        <span>{{ source }}</span>
+        <span style="color:#ffffff; font-weight:600;">{{ count }} records</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width: {{ (count / (buyers_audit.total_records or 1) * 100)|round }}%; background: var(--accent-info);"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Right Card: Latest Campaign & System Health -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">⚡ System Health & Outreach Status</h2>
+      <span class="badge {% if config_data.TEST_MODE %}badge-warning{% else %}badge-success{% endif %}">
+        {% if config_data.TEST_MODE %}TEST MODE ACTIVE{% else %}LIVE READY{% endif %}
+      </span>
+    </div>
+
+    <!-- Health Indicators List -->
+    <div style="display:flex; flex-direction:column; gap:14px; margin-bottom: 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+        <div>
+          <strong style="color:#ffffff;">Attachment File:</strong>
+          <div style="font-size:0.8rem; color:var(--text-secondary);">{{ attachment_meta.filename }} ({{ attachment_meta.size_kb }} KB)</div>
+        </div>
+        <span class="badge {% if attachment_meta.is_valid %}badge-success{% else %}badge-danger{% endif %}">
+          {% if attachment_meta.is_valid %}VALIDATED{% else %}MISSING{% endif %}
+        </span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+        <div>
+          <strong style="color:#ffffff;">Gemini AI Classifier:</strong>
+          <div style="font-size:0.8rem; color:var(--text-secondary);">{% if is_gemini_ready %}API Operational{% else %}Local Heuristic Engine Active (Safe Fallback){% endif %}</div>
+        </div>
+        <span class="badge {% if is_gemini_ready %}badge-success{% else %}badge-secondary{% endif %}">
+          {% if is_gemini_ready %}CONNECTED{% else %}LOCAL TEST{% endif %}
+        </span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+        <div>
+          <strong style="color:#ffffff;">Gmail SMTP Protection:</strong>
+          <div style="font-size:0.8rem; color:var(--text-secondary);">{% if is_gmail_ready %}Live SMTP Authenticated{% else %}Protected (Simulated Dispatch Mode){% endif %}</div>
+        </div>
+        <span class="badge {% if is_gmail_ready %}badge-success{% else %}badge-warning{% endif %}">
+          {% if is_gmail_ready %}LIVE READY{% else %}TEST PROTECTED{% endif %}
+        </span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+        <div>
+          <strong style="color:#ffffff;">Daily Send Quota:</strong>
+          <div style="font-size:0.8rem; color:var(--text-secondary);">Configured limit: {{ config_data.DAILY_SEND_LIMIT }} emails/day</div>
+        </div>
+        <span class="badge badge-info">LIMIT {{ config_data.DAILY_SEND_LIMIT }}</span>
+      </div>
+    </div>
+
+    <!-- Latest Campaign Card -->
+    {% if latest_campaign %}
+    <div style="border-top:1px solid var(--border-color); padding-top:16px;">
+      <h3 style="font-size:0.9rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:10px;">Latest Campaign Batch</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-family:var(--font-mono); font-size:0.85rem; color:#ffffff;">{{ latest_campaign.campaign_id }}</span>
+        <span class="badge {% if latest_campaign.status.value == 'COMPLETED' %}badge-success{% elif latest_campaign.status.value == 'APPROVED' %}badge-info{% elif latest_campaign.status.value == 'READY_FOR_REVIEW' %}badge-warning{% else %}badge-secondary{% endif %}">
+          {{ latest_campaign.status.value }}
+        </span>
+      </div>
+      <div style="font-size:0.85rem; color:var(--text-secondary);">
+        Audience: <strong>{{ latest_campaign.target_audience|upper }}</strong> &bull; Total Candidates: <strong>{{ latest_campaign.total_recipients }}</strong> &bull; Eligible: <strong>{{ latest_campaign.eligible_recipients }}</strong>
+      </div>
+      <div style="margin-top:12px;">
+        <a href="{{ url_for('campaign_detail', campaign_id=latest_campaign.campaign_id) }}" class="btn btn-secondary btn-sm">View Campaign Details &rarr;</a>
+      </div>
+    </div>
+    {% else %}
+    <div style="border-top:1px solid var(--border-color); padding-top:16px; color:var(--text-muted); font-size:0.85rem;">
+      No campaigns created yet. Click <a href="{{ url_for('campaign_send_view') }}">Prepare Campaign</a> to initialize one.
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

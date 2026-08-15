@@ -1,0 +1,49 @@
+# ==============================================================================
+# Docker Compose Definition for API 3 - EXPORT Automation System
+# Mounts persistent data volume and locks TEST_MODE=true for safe execution
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  export-automation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: export_automation_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      # Mandatory Safety Lock
+      - TEST_MODE=true
+      - FLASK_ENV=production
+      - PORT=5000
+      
+      # Discovery & Search Settings
+      - SEARCH_KEYWORD=Singing Bowls
+      - SEARCH_DELAY=1.0
+      - MAX_SEARCH_RESULTS=15
+      - MAX_WEBSITES_PER_RESULT=5
+      - TEST_DISCOVERY=false
+      
+      # Outreach & Simulation Quotas
+      - DAILY_SEND_LIMIT=10
+      - TEST_SIMULATION_LIMIT=50
+      - SEND_DELAY=5.0
+      - PRESENTATION_PATH=assets/company_presentation.pdf
+      
+      # AI Classification Settings
+      - CLASSIFICATION_LIVE=false
+      - CLASSIFICATION_BATCH_SIZE=20
+      - CLASSIFICATION_REVIEW_THRESHOLD=0.70
+    volumes:
+      # Persistent storage bindings for CSV/JSON datastores and PDF presentations
+      - ./data:/app/data
+      - ./assets:/app/assets
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

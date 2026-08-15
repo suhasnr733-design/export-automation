@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Outreach Campaign Dispatch{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Outreach Campaign Dispatch & Safety Gate</h1>
+    <p class="page-subtitle">Configure personalized catalogs, validate attachments, review recipient previews, and safely execute campaigns.</p>
+  </div>
+</div>
+
+<!-- Send Page Safety Banner -->
+{% if config_data.TEST_MODE %}
+<div class="card" style="background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.4); margin-bottom: 2rem;">
+  <div style="display:flex; align-items:center; gap:16px;">
+    <div style="font-size:2rem;">🟡</div>
+    <div>
+      <h3 style="color:#fbbf24; font-size:1.1rem; font-weight:700;">TEST MODE / DRY RUN ACTIVE</h3>
+      <p style="color:var(--text-secondary); font-size:0.875rem;">
+        All outreach operations will run in safe simulation mode. MIME structures and attachments are validated, and results are logged to <code>sent_log.csv</code> without connecting to external SMTP servers.
+      </p>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="grid-2">
+  
+  <!-- Campaign Configuration Form -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📝 1. Prepare Outreach Campaign</h2>
+      <span class="badge badge-secondary">Campaign Setup</span>
+    </div>
+
+    <form action="{{ url_for('create_campaign_action') }}" method="POST">
+      
+      <!-- Target Audience Selection -->
+      <div class="form-group">
+        <label class="form-label" for="audience">Target Audience Segment</label>
+        <select id="audience" name="audience" class="form-control">
+          <option value="business" {% if selected_audience == 'business' %}selected{% endif %}>Business Contacts (B2B Importers & Distributors) [{{ biz_count }} Leads]</option>
+          <option value="individual" {% if selected_audience == 'individual' %}selected{% endif %}>Individual Contacts [{{ ind_count }} Leads]</option>
+          <option value="all" {% if selected_audience == 'all' %}selected{% endif %}>All Contacts [{{ total_buyers }} Leads]</option>
+        </select>
+      </div>
+
+      <!-- Export Product Keyword -->
+      <div class="form-group">
+        <label class="form-label" for="product_keyword">Export Product Line</label>
+        <input type="text" id="product_keyword" name="product_keyword" class="form-control" value="{{ product_keyword or config_data.SEARCH_KEYWORD }}">
+        <div class="form-help">Inserted into <code>&#123;&#123;product&#125;&#125;</code> placeholder across messages.</div>
+      </div>
+
+      <!-- Email Template Body -->
+      <div class="form-group">
+        <label class="form-label" for="template_text">Outreach Email Template (Includes Subject)</label>
+        <textarea id="template_text" name="template_text" class="form-control" rows="8">{{ template_content }}</textarea>
+        <div class="form-help">Supported placeholders: <code>&#123;&#123;buyer_name&#125;&#125;</code>, <code>&#123;&#123;company_name&#125;&#125;</code>, <code>&#123;&#123;country&#125;&#125;</code>, <code>&#123;&#123;product&#125;&#125;</code>, <code>&#123;&#123;website&#125;&#125;</code></div>
+      </div>
+
+      <div style="margin-top: 1.5rem;">
+        <button type="submit" class="btn btn-primary btn-lg">🔍 Prepare & Generate Preview</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Campaign Parameters & Attachment Health -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📎 2. Pre-flight Attachment & Constraints</h2>
+      <span class="badge {% if attachment_meta.is_valid %}badge-success{% else %}badge-danger{% endif %}">
+        {% if attachment_meta.is_valid %}ATTACHMENT OK{% else %}ATTACHMENT MISSING{% endif %}
+      </span>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:1.5rem;">
+      <div style="background:var(--bg-surface-elevated); padding:14px; border-radius:var(--radius-md);">
+        <strong style="color:#ffffff;">Attachment Document:</strong>
+        <div style="font-family:var(--font-mono); font-size:0.85rem; color:var(--accent-info); margin:4px 0;">
+          {{ attachment_meta.filename }}
+        </div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">
+          Size: {{ attachment_meta.size_kb }} KB &bull; Type: {{ attachment_meta.extension }} &bull; Path: <code>{{ attachment_meta.path }}</code>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-surface-elevated); padding:14px; border-radius:var(--radius-md);">
+        <strong style="color:#ffffff;">Daily Sending Throttle:</strong>
+        <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:4px;">
+          Max Limit: <strong>{{ config_data.DAILY_SEND_LIMIT }} sends/day</strong> (Protects sender domain reputation).
+        </div>
+      </div>
+
+      <div style="background:var(--bg-surface-elevated); padding:14px; border-radius:var(--radius-md);">
+        <strong style="color:#ffffff;">Sequential Send Delay:</strong>
+        <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:4px;">
+          Delay between messages: <strong>{{ config_data.SEND_DELAY }}s</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Active Campaign Preview & Approval Gate -->
+{% if active_campaign %}
+<div class="card" style="border-color: var(--accent-primary);">
+  <div class="card-header">
+    <div>
+      <h2 class="card-title">📋 Active Campaign: {{ active_campaign.campaign_id }}</h2>
+      <span class="card-subtitle">
+        Audience: <strong>{{ active_campaign.target_audience|upper }}</strong> &bull; Created: {{ active_campaign.created_at[:19] }}
+      </span>
+    </div>
+
+    <!-- Approval / Dispatch Action Buttons -->
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="badge {% if active_campaign.status.value == 'APPROVED' %}badge-info{% elif active_campaign.status.value == 'COMPLETED' %}badge-success{% else %}badge-warning{% endif %}" style="font-size:0.85rem; padding:6px 14px;">
+        STATUS: {{ active_campaign.status.value }}
+      </span>
+
+      {% if active_campaign.status.value in ('DRAFT', 'READY_FOR_REVIEW') %}
+        <button type="button" onclick="openModal('approvalModal')" class="btn btn-warning">
+          ✓ Approve Campaign Gate
+        </button>
+      {% elif active_campaign.status.value == 'APPROVED' %}
+        <button type="button" onclick="openModal('executeModal')" class="btn btn-success">
+          {% if config_data.TEST_MODE %}▶ Run Test Campaign{% else %}▶ Dispatch Live Campaign{% endif %}
+        </button>
+      {% elif active_campaign.status.value == 'COMPLETED' %}
+        <a href="{{ url_for('campaign_detail', campaign_id=active_campaign.campaign_id) }}" class="btn btn-secondary">
+          📊 View Execution Report
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Ingestion Metrics for this campaign -->
+  <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom:1.5rem;">
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Candidates</span></div>
+      <div class="kpi-value">{{ active_campaign.total_recipients }}</div>
+    </div>
+    <div class="kpi-card biz">
+      <div class="kpi-header"><span class="kpi-label">Eligible Queue</span></div>
+      <div class="kpi-value">{{ active_campaign.eligible_recipients }}</div>
+    </div>
+    <div class="kpi-card test">
+      <div class="kpi-header"><span class="kpi-label">Filtered / Skipped</span></div>
+      <div class="kpi-value">{{ active_campaign.skipped_recipients }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Attachment</span></div>
+      <div class="kpi-value" style="font-size:1.2rem; margin-top:8px;">{{ attachment_meta.filename }}</div>
+    </div>
+  </div>
+
+  <!-- Recipient Preview Table -->
+  <h3 style="font-size:0.95rem; font-weight:700; color:#ffffff; margin-bottom:10px;">Recipient Queue Preview & Personalization Audit:</h3>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Recipient</th>
+          <th>Company</th>
+          <th>Country</th>
+          <th>Classification</th>
+          <th>Dispatch Status</th>
+          <th>Personalized Snippet</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in active_previews %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td style="font-family:var(--font-mono); color:var(--text-primary);">{{ p.email }}</td>
+          <td>{{ p.company_name or '—' }}</td>
+          <td>{{ p.country or '—' }}</td>
+          <td><span class="badge badge-secondary">{{ p.classification|upper }}</span></td>
+          <td>
+            {% if p.is_eligible %}
+              <span class="badge badge-success">ELIGIBLE</span>
+            {% else %}
+              <span class="badge badge-warning" title="{{ p.skip_reason }}">{{ p.skip_reason.split()[0] }}</span>
+            {% endif %}
+          </td>
+          <td style="font-size:0.8rem; color:var(--text-secondary); max-width:300px;">
+            <strong>Subj:</strong> {{ p.subject }}<br>
+            {{ p.body_snippet }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: Campaign Approval Gate -->
+<div class="modal-backdrop" id="approvalModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Approval Gate Confirmation</h3>
+      <button onclick="closeModal('approvalModal')" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.5rem;">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>You are approving campaign <strong>{{ active_campaign.campaign_id }}</strong> for execution.</p>
+      <div style="background:var(--bg-surface-elevated); padding:12px; border-radius:var(--radius-md); margin:12px 0; font-size:0.85rem; color:var(--text-primary);">
+        &bull; Target Audience: <strong>{{ active_campaign.target_audience|upper }}</strong><br>
+        &bull; Eligible Recipients: <strong>{{ active_campaign.eligible_recipients }} contacts</strong><br>
+        &bull; Attachment: <strong>{{ attachment_meta.filename }}</strong><br>
+        &bull; Execution Mode: <strong>{% if config_data.TEST_MODE %}TEST MODE (Safe Mock){% else %}LIVE GMAIL{% endif %}</strong>
+      </div>
+      <p style="font-size:0.85rem; color:var(--text-secondary);">Once approved, you can initiate the dispatch sequence.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" onclick="closeModal('approvalModal')" class="btn btn-secondary">Cancel</button>
+      <form action="{{ url_for('approve_campaign_action', campaign_id=active_campaign.campaign_id) }}" method="POST">
+        <button type="submit" class="btn btn-warning">✓ Confirm Approval</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Execute Campaign -->
+<div class="modal-backdrop" id="executeModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Initiate Campaign Execution</h3>
+      <button onclick="closeModal('executeModal')" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.5rem;">&times;</button>
+    </div>
+    <div class="modal-body">
+      {% if config_data.TEST_MODE %}
+      <p>Execute safe simulated dispatch for <strong>{{ active_campaign.eligible_recipients }} eligible recipients</strong>?</p>
+      <p style="font-size:0.85rem; color:#fbbf24; margin-top:8px;">
+        🟡 No external emails will be sent. Outcomes will be saved to <code>sent_log.csv</code> as <code>TEST_MODE_SUCCESS</code>.
+      </p>
+      {% else %}
+      <p style="color:#f87171; font-weight:bold;">⚠️ WARNING: LIVE OUTREACH DISPATCH</p>
+      <p>This will send real emails via Gmail SMTP to {{ active_campaign.eligible_recipients }} recipients.</p>
+      {% endif %}
+    </div>
+    <div class="modal-footer">
+      <button type="button" onclick="closeModal('executeModal')" class="btn btn-secondary">Cancel</button>
+      <form action="{{ url_for('execute_campaign_action', campaign_id=active_campaign.campaign_id) }}" method="POST">
+        <button type="submit" class="btn btn-success">
+          {% if config_data.TEST_MODE %}▶ Run Test Campaign{% else %}▶ Send Real Emails{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

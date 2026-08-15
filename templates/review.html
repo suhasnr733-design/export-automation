@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Human Lead Review & Qualification Desk{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+  <div>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <h1 class="page-title" style="margin:0;">Human Lead Review Desk</h1>
+      <span class="badge badge-primary" style="font-size:0.85rem; padding:4px 10px;">Phase 6F</span>
+      <span class="badge" style="background:#8b5cf6; color:#ffffff; font-weight:700;">GEMINI GENERATED</span>
+      <span class="badge" style="background:#f59e0b; color:#1e1e1e; font-weight:800;">HUMAN REVIEW REQUIRED</span>
+    </div>
+    <p class="page-subtitle">
+      Inspect AI-qualified leads from Live Web Discovery. Review commercial intent signals, verify country & contact readiness, and explicitly approve leads before campaign preview.
+    </p>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <a href="{{ url_for('buyers_list') }}" class="btn btn-secondary">👥 View All Buyers</a>
+    <a href="{{ url_for('campaigns_list') }}" class="btn btn-secondary">📋 Campaign Store</a>
+  </div>
+</div>
+
+<!-- Safety Notice Banner -->
+<div class="alert-box" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 24px; display:flex; align-items:center; gap:14px;">
+  <span style="font-size:1.6rem;">🛡️</span>
+  <div>
+    <strong style="color: #fbbf24; text-transform:uppercase; letter-spacing:0.05em; font-size:0.85rem;">Safety Architecture: Explicit Approval Gate</strong>
+    <p style="margin:2px 0 0; color:var(--text-secondary); font-size:0.875rem;">
+      High qualification scores do <strong>NOT</strong> automatically authorize email dispatch. Each lead requires human sign-off. Approved leads enter a <em>Safe Campaign Preview</em> and still require the second campaign approval gate. <strong>TEST_MODE=true</strong> is strictly active.
+    </p>
+  </div>
+</div>
+
+<!-- Summary Metrics Bar -->
+<div class="stats-grid" style="margin-bottom: 28px;">
+  <div class="stat-card">
+    <div class="stat-label">Live Discovery Leads</div>
+    <div class="stat-value">{{ total_candidates }}</div>
+    <div class="stat-helper">Targeting product niche</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Approved for Outreach</div>
+    <div class="stat-value" style="color: var(--accent-success);">{{ review_audit.approved }}</div>
+    <div class="stat-helper">Authorized for campaign preview</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Pending Decision</div>
+    <div class="stat-value" style="color: var(--accent-warning);">{{ review_audit.pending }}</div>
+    <div class="stat-helper">Awaiting human sign-off</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Manual Review / Rejected</div>
+    <div class="stat-value" style="color: #a78bfa;">{{ review_audit.manual_review_requested + review_audit.rejected }}</div>
+    <div class="stat-helper">{{ review_audit.manual_review_requested }} Review, {{ review_audit.rejected }} Rejected</div>
+  </div>
+</div>
+
+<!-- Candidates Review Cards -->
+{% if candidates %}
+  <div style="display:flex; flex-direction:column; gap:24px;">
+    {% for c in candidates %}
+    <div class="card" id="lead-{{ loop.index }}" style="border: 1px solid {% if c.review_status == 'APPROVED' %}#10b981{% elif c.review_status == 'REJECTED' %}#ef4444{% elif c.review_status == 'MANUAL_REVIEW_REQUESTED' %}#8b5cf6{% else %}var(--border-color){% endif %}; background: var(--bg-surface); border-radius: var(--radius-lg); overflow:hidden;">
+      
+      <!-- Card Header -->
+      <div style="padding: 18px 24px; background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h2 style="margin:0; font-size:1.25rem; font-weight:700; color:var(--text-primary);">
+            {{ c.company_name }}
+          </h2>
+          <span class="badge {% if c.qualification_level == 'HIGH' %}badge-success{% elif c.qualification_level == 'MEDIUM' %}badge-warning{% else %}badge-danger{% endif %}">
+            Score: {{ c.qualification_score }}/100 &bull; {{ c.qualification_level }}
+          </span>
+          <span class="badge {% if c.recommendation == 'REVIEW_FOR_OUTREACH' %}badge-info{% elif c.recommendation == 'MANUAL_REVIEW' %}badge-warning{% else %}badge-danger{% endif %}">
+            {{ c.recommendation }}
+          </span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px;">
+          <!-- Review Status Badge -->
+          {% if c.review_status == 'APPROVED' %}
+            <span class="badge badge-success" style="font-size:0.85rem; padding:6px 12px; font-weight:800;">
+              ✓ APPROVED FOR OUTREACH
+            </span>
+          {% elif c.review_status == 'REJECTED' %}
+            <span class="badge badge-danger" style="font-size:0.85rem; padding:6px 12px; font-weight:800;">
+              ✕ REJECTED
+            </span>
+          {% elif c.review_status == 'MANUAL_REVIEW_REQUESTED' %}
+            <span class="badge" style="background:#8b5cf6; color:#ffffff; font-size:0.85rem; padding:6px 12px; font-weight:800;">
+              ⚠️ MANUAL REVIEW REQUESTED
+            </span>
+          {% else %}
+            <span class="badge badge-warning" style="font-size:0.85rem; padding:6px 12px; font-weight:800;">
+              ⏳ PENDING HUMAN REVIEW
+            </span>
+          {% endif %}
+
+          {% if c.review_status == 'APPROVED' %}
+            <a href="{{ url_for('review_campaign_preview', email=c.email) }}" class="btn btn-primary btn-sm" style="font-weight:700; padding:6px 14px;">
+              🔍 Preview Campaign
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Card Body Grid -->
+      <div style="padding: 24px; display:grid; grid-template-columns: 1.2fr 1fr; gap:24px;">
+        
+        <!-- Left Column: Company Details & Commercial Signals -->
+        <div>
+          <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:14px;">
+            Candidate Identity & Commercial Intent
+          </h3>
+
+          <div style="display:grid; grid-template-columns: 130px 1fr; row-gap:10px; font-size:0.92rem;">
+            <div style="color:var(--text-secondary); font-weight:500;">Email:</div>
+            <div>
+              <code style="background:var(--bg-main); padding:2px 8px; border-radius:4px; font-size:0.9rem; color:#60a5fa;">{{ c.email }}</code>
+            </div>
+
+            <div style="color:var(--text-secondary); font-weight:500;">Website:</div>
+            <div>
+              {% if c.website %}
+                <a href="{{ c.website }}" target="_blank" rel="noopener" style="color:var(--accent-primary); text-decoration:underline;">{{ c.website }} ↗</a>
+              {% else %}
+                <span style="color:var(--text-muted);">Not available</span>
+              {% endif %}
+            </div>
+
+            <div style="color:var(--text-secondary); font-weight:500;">Country:</div>
+            <div>
+              {% if c.is_country_unknown %}
+                <span class="badge badge-warning" style="font-weight:700; background:rgba(245, 158, 11, 0.2); color:#fbbf24; border:1px solid rgba(245, 158, 11, 0.4);">
+                  ⚠️ {{ c.country_display }}
+                </span>
+              {% else %}
+                <span style="color:var(--text-primary); font-weight:600;">🌍 {{ c.country_display }}</span>
+              {% endif %}
+            </div>
+
+            <div style="color:var(--text-secondary); font-weight:500;">Product Niche:</div>
+            <div>
+              <strong style="color:var(--text-primary);">{{ c.product }}</strong>
+            </div>
+
+            <div style="color:var(--text-secondary); font-weight:500;">AI Classification:</div>
+            <div>
+              <span class="badge badge-info">{{ c.business_status|upper }}</span>
+              <span style="font-size:0.8rem; color:var(--text-muted); margin-left:6px;">(Confidence: {{ c.confidence }})</span>
+            </div>
+
+            <div style="color:var(--text-secondary); font-weight:500;">Buyer Intent:</div>
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div style="flex:1; background:var(--bg-main); height:8px; border-radius:4px; overflow:hidden; max-width:140px;">
+                  <div style="width: {{ (c.buyer_intent * 100)|int }}%; height:100%; background: {% if c.buyer_intent >= 0.7 %}#10b981{% elif c.buyer_intent >= 0.4 %}#f59e0b{% else %}#ef4444{% endif %};"></div>
+                </div>
+                <span style="font-weight:700; font-family:var(--font-mono); font-size:0.85rem;">{{ "%.2f"|format(c.buyer_intent) }}</span>
+              </div>
+            </div>
+
+            <div style="color:var(--text-secondary); font-weight:500;">Detected Roles:</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              {% for sig in c.commercial_signals %}
+                <span class="badge" style="background:rgba(59, 130, 246, 0.15); color:#93c5fd; border:1px solid rgba(59, 130, 246, 0.3);">
+                  {{ sig }}
+                </span>
+              {% endfor %}
+            </div>
+
+            <div style="color:var(--text-secondary); font-weight:500;">Data Source:</div>
+            <div>
+              <span style="color:var(--text-muted); font-size:0.85rem;">{{ c.qualification_source }} Qualification Model</span>
+            </div>
+          </div>
+
+          <!-- Evidence Observations Box -->
+          <div style="margin-top:18px; padding:14px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:var(--radius-md);">
+            <strong style="font-size:0.8rem; text-transform:uppercase; color:var(--text-secondary); display:block; margin-bottom:8px;">
+              🤖 AI Evidence & Observations:
+            </strong>
+            <ul style="margin:0; padding-left:18px; color:var(--text-primary); font-size:0.875rem; line-height:1.6;">
+              {% for ev in c.evidence %}
+                <li>{{ ev }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right Column: Human Review Action Form -->
+        <div style="background:var(--bg-surface-elevated); padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:12px;">
+              Human Reviewer Decision
+            </h3>
+
+            {% if c.review_timestamp %}
+              <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
+                Last decision recorded: <strong style="color:var(--text-secondary);">{{ c.reviewer_decision }}</strong> on <code>{{ c.review_timestamp }}</code>
+              </div>
+            {% endif %}
+
+            <form action="{{ url_for('submit_lead_review_decision') }}" method="POST" id="form-{{ loop.index }}">
+              <input type="hidden" name="email" value="{{ c.email }}">
+              <input type="hidden" name="company_name" value="{{ c.company_name }}">
+              <input type="hidden" name="qualification_score" value="{{ c.qualification_score }}">
+              <input type="hidden" name="recommendation" value="{{ c.recommendation }}">
+
+              <div style="margin-bottom:14px;">
+                <label style="display:block; font-size:0.85rem; color:var(--text-secondary); margin-bottom:6px; font-weight:500;">
+                  Reviewer Notes / Verification Checklist:
+                </label>
+                <textarea name="notes" rows="3" class="form-control" style="width:100%; font-size:0.875rem; resize:vertical; background:var(--bg-main); color:var(--text-primary); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:8px 10px;" placeholder="Optional notes (e.g. verified .com presence, retail brand status, logistics requirements)...">{{ c.review_notes }}</textarea>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="submit" name="decision" value="approve" class="btn btn-success" style="width:100%; font-weight:700; display:flex; justify-content:center; align-items:center; gap:8px;">
+                  <span>✓</span> Approve for Campaign
+                </button>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                  <button type="submit" name="decision" value="manual_review" class="btn btn-secondary" style="font-size:0.85rem; background:#4c1d95; border-color:#6d28d9; color:#e9d5ff;">
+                    ⚠️ Request Review
+                  </button>
+                  <button type="submit" name="decision" value="reject" class="btn btn-danger" style="font-size:0.85rem;">
+                    ✕ Reject Lead
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Bottom Action Gate Guide -->
+          <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border-color); font-size:0.8rem; color:var(--text-muted);">
+            {% if c.review_status == 'APPROVED' %}
+              <span style="color:var(--accent-success); font-weight:600;">✓ Lead Approved:</span> Click "Preview Campaign" to inspect personalized message and PDF attachment.
+            {% else %}
+              <span>Approval unlocks the personalized campaign preview gate.</span>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card" style="padding:48px; text-align:center;">
+    <div style="font-size:3rem; margin-bottom:12px;">🔍</div>
+    <h3 style="margin-bottom:8px;">No Live Discovery Leads Found</h3>
+    <p style="color:var(--text-secondary); max-width:500px; margin:0 auto 20px;">
+      There are currently no buyer records tagged with <code>LIVE_DISCOVERY</code> in discovery provenance. Run Live Discovery to find targeted export leads.
+    </p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Return to Dashboard</a>
+  </div>
+{% endif %}
+
+{% endblock %}

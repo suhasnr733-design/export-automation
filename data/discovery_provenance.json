@@ -1,0 +1,152 @@
+{
+  "metadata": {
+    "last_discovery_keyword": "Handmade Pashmina",
+    "last_discovery_timestamp": "2026-08-14T18:29:49+05:30",
+    "total_provenance_records": 13
+  },
+  "records": {
+    "import@zenithhealing.com": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "Google Search",
+      "url": "https://www.zenithhealing.com",
+      "company_name": "Zenith Sound Healing Imports Ltd",
+      "country": "United States",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "contact@aurawellness.de": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "Google Search",
+      "url": "https://www.aurawellness.de",
+      "company_name": "Aura Wellness Wholesale",
+      "country": "Germany",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "buyer.sophie@lotusliving.co.uk": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "Google Search",
+      "url": "https://www.lotusliving.co.uk",
+      "company_name": "Lotus Living Global",
+      "country": "United Kingdom",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "info@holisticgoods.com": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "Facebook",
+      "url": "https://www.facebook.com/holisticgoodswholesale",
+      "company_name": "Holistic Goods LLC",
+      "country": "United States",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "astrid.buyer@nordicsound.se": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "Facebook",
+      "url": "https://www.nordicsound.se",
+      "company_name": "Nordic Sound & Soul",
+      "country": "Sweden",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "liam@celticwellbeing.ie": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "LinkedIn",
+      "url": "https://www.celticwellbeing.ie",
+      "company_name": "Celtic Wellbeing Distribution",
+      "country": "Ireland",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "klaus.s@alpensound.at": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "LinkedIn",
+      "url": "https://www.alpensound.at",
+      "company_name": "Alpen Sound & Spa Imports",
+      "country": "Austria",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "purchasing@australiansound.com.au": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "Trade Directory",
+      "url": "https://www.australiansound.com.au",
+      "company_name": "Australasian Sound Supplies Pty",
+      "country": "Australia",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "chloe.procurement@maplewellness.ca": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "Trade Directory",
+      "url": "https://www.maplewellness.ca",
+      "company_name": "Maple Leaf Wellness Inc",
+      "country": "Canada",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "wholesale@kyotozenharmonix.jp": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "Website Search",
+      "url": "https://www.kyotozenharmonix.jp",
+      "company_name": "Kyoto Zen Harmonix",
+      "country": "Japan",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "compras@solylunadist.es": {
+      "data_source": "HISTORICAL_TEST",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-14T11:00:00Z",
+      "source_platform": "Website Search",
+      "url": "https://www.solylunadist.es",
+      "company_name": "Sol y Luna Distribuciones",
+      "country": "Spain",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+    },
+    "support@pashminaartisan.in": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Handmade Pashmina",
+      "discovery_timestamp": "2026-08-14T18:29:49+05:30",
+      "source_platform": "Website Search",
+      "url": "https://pashminaartisan.in",
+      "company_name": "Pashmina Artisan",
+      "country": "India",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "relevant product (pashmina, artisan) and commercial buyer criteria"
+    },
+    "support@pashminavogue.com": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Handmade Pashmina",
+      "discovery_timestamp": "2026-08-14T18:29:49+05:30",
+      "source_platform": "Website Search",
+      "url": "https://pashminavogue.com",
+      "company_name": "Pashmina Vogue™",
+      "country": "",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "relevant product (pashmina) and commercial buyer criteria"
+    }
+  }
+}

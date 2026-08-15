@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}AI Lead Classification{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">AI Lead Classification & Segmentation</h1>
+    <p class="page-subtitle">Categorize discovered buyer contacts into B2B Commercial Importers and Individual Practitioners.</p>
+  </div>
+</div>
+
+<!-- Classification Overview KPIs -->
+<div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="kpi-card">
+    <div class="kpi-header"><span class="kpi-label">Total Buyers</span><span class="kpi-icon">👥</span></div>
+    <div class="kpi-value">{{ total_buyers }}</div>
+    <div class="kpi-subtext">In data/buyers.csv</div>
+  </div>
+
+  <div class="kpi-card biz">
+    <div class="kpi-header"><span class="kpi-label">Business (B2B)</span><span class="kpi-icon">🏢</span></div>
+    <div class="kpi-value">{{ biz_count }}</div>
+    <div class="kpi-subtext">in data/business_emails.csv</div>
+  </div>
+
+  <div class="kpi-card ind">
+    <div class="kpi-header"><span class="kpi-label">Individual</span><span class="kpi-icon">👤</span></div>
+    <div class="kpi-value">{{ ind_count }}</div>
+    <div class="kpi-subtext">in data/individual_emails.csv</div>
+  </div>
+
+  <div class="kpi-card test">
+    <div class="kpi-header"><span class="kpi-label">Review Required</span><span class="kpi-icon">🔍</span></div>
+    <div class="kpi-value">{{ review_count }}</div>
+    <div class="kpi-subtext">Confidence &lt; {{ (config_data.CLASSIFICATION_REVIEW_THRESHOLD * 100)|round }}%</div>
+  </div>
+</div>
+
+<!-- AI Classification Action Card -->
+<div class="card" style="border-left: 4px solid var(--accent-primary);">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem;">
+    <div>
+      <h2 style="font-size:1.15rem; font-weight:700; color:#ffffff; margin-bottom:4px;">Execute Classification Pipeline</h2>
+      <p style="font-size:0.875rem; color:var(--text-secondary);">
+        {% if config_data.TEST_MODE %}
+          <span style="color:#fbbf24; font-weight:600;">🟡 TEST MODE ACTIVE:</span> Local test classifier will be used (Deterministic multi-signal heuristics). Gemini API will not be called.
+        {% else %}
+          <span style="color:#34d399; font-weight:600;">🟢 LIVE MODE:</span> Using Google Gemini 2.5 Flash API with batch processing.
+        {% endif %}
+      </p>
+    </div>
+
+    <form action="{{ url_for('run_classification_action') }}" method="POST">
+      <button type="submit" class="btn btn-primary btn-lg">
+        🤖 Run AI Classification ({{ total_buyers }} Contacts)
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Classification Audit Logs Table -->
+<div class="card">
+  <div class="card-header">
+    <div style="display:flex; align-items:center; justify-content:space-between; width:100%; flex-wrap:wrap; gap:12px;">
+      <h2 class="card-title">📋 Classification Audit Log (data/classification_log.csv)</h2>
+      <div style="display:flex; gap:10px;">
+        <input type="text" id="tableSearch" class="form-control" placeholder="Search email or reason..." style="width:240px;">
+        <select id="categoryFilter" class="form-control" style="width:auto;">
+          <option value="all">All Records</option>
+          <option value="business">Business</option>
+          <option value="individual">Individual</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Recipient Email</th>
+          <th>Category</th>
+          <th>Confidence</th>
+          <th>Classification Reason</th>
+          <th>Review Required</th>
+          <th>Source Engine</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in classification_logs %}
+        <tr data-category="{{ row.category }}">
+          <td style="color:var(--text-muted);">{{ loop.index }}</td>
+          <td style="font-family:var(--font-mono); color:var(--text-primary);">{{ row.email }}</td>
+          <td>
+            {% if row.category == 'business' %}
+              <span class="badge badge-success"><span class="badge-dot"></span> BUSINESS</span>
+            {% elif row.category == 'individual' %}
+              <span class="badge badge-info"><span class="badge-dot"></span> INDIVIDUAL</span>
+            {% else %}
+              <span class="badge badge-secondary">{{ row.category|upper }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <span style="font-family:var(--font-mono); font-weight:600; color:#ffffff;">{{ (row.confidence|float * 100)|round }}%</span>
+          </td>
+          <td style="font-size:0.85rem; max-width:320px; color:var(--text-secondary);">
+            {{ row.reason }}
+          </td>
+          <td>
+            {% if row.review_required|string|lower in ('true', '1', 'yes') %}
+              <span class="badge badge-warning">FLAGGED</span>
+            {% else %}
+              <span class="badge badge-secondary" style="opacity:0.6;">NO</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge badge-secondary" style="font-family:var(--font-mono); font-size:0.7rem;">
+              {{ row.classification_source }}
+            </span>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" style="text-align:center; padding:3rem; color:var(--text-muted);">
+            No classification records found. Click <strong>Run AI Classification</strong> to analyze contacts.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

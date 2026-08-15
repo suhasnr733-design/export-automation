@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Buyer Contacts{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Discovered Buyer Dataset</h1>
+    <p class="page-subtitle">Verified international importer profiles, trade contacts, and buying desk metadata.</p>
+  </div>
+  <div style="display: flex; gap: 10px;">
+    <a href="{{ url_for('upload_buyers') }}" class="btn btn-secondary">📤 Upload CSV</a>
+    <a href="{{ url_for('review_view') }}" class="btn btn-secondary" style="border-color:#8b5cf6; color:#c4b5fd;">🛡️ Review Live Leads</a>
+    <a href="{{ url_for('classify_view') }}" class="btn btn-primary">🤖 Classify Audience</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; width:100%;">
+      <div style="flex:1; min-width:240px;">
+        <input type="text" id="tableSearch" class="form-control" placeholder="🔍 Search buyers by name, company, email, or country...">
+      </div>
+      <div style="display:flex; gap:10px;">
+        <select id="categoryFilter" class="form-control" style="width:auto;">
+          <option value="all">All Categories</option>
+          <option value="business">Business (B2B)</option>
+          <option value="individual">Individual</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Buyer Name</th>
+          <th>Company / Entity</th>
+          <th>Email Address</th>
+          <th>Country</th>
+          <th>Category</th>
+          <th>Confidence</th>
+          <th>Source</th>
+          <th>Website</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in buyers %}
+        <tr data-category="{{ b.category }}">
+          <td style="color:var(--text-muted);">{{ loop.index }}</td>
+          <td><strong>{{ b.buyer_name or '—' }}</strong></td>
+          <td>{{ b.company_name or '—' }}</td>
+          <td style="font-family:var(--font-mono); color:var(--text-primary);">{{ b.email }}</td>
+          <td>{{ b.country or '—' }}</td>
+          <td>
+            {% if b.category == 'business' %}
+              <span class="badge badge-success"><span class="badge-dot"></span> B2B</span>
+            {% elif b.category == 'individual' %}
+              <span class="badge badge-info"><span class="badge-dot"></span> INDIVIDUAL</span>
+            {% else %}
+              <span class="badge badge-secondary">UNCLASSIFIED</span>
+            {% endif %}
+          </td>
+          <td>
+            <span style="font-family:var(--font-mono); font-size:0.8rem;">{{ (b.confidence * 100)|round }}%</span>
+          </td>
+          <td><span class="badge badge-secondary">{{ b.source_platform }}</span></td>
+          <td>
+            {% if b.website %}
+              <a href="{{ b.website }}" target="_blank" rel="noopener noreferrer" style="font-size:0.8rem;">Visit ↗</a>
+            {% else %}
+              <span style="color:var(--text-muted);">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" style="text-align:center; padding:3rem; color:var(--text-muted);">
+            No buyer records currently in <code>data/buyers.csv</code>. Use <a href="{{ url_for('upload_buyers') }}">Upload CSV</a> or discovery CLI.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

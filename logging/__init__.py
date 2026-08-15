@@ -1,0 +1,100 @@
+"""
+Logging and CSV Activity Storage Package.
+
+Bridges standard library logging with project-specific activity logger and CSV stores,
+ensuring full compatibility across all third-party libraries and internal modules.
+"""
+
+import sys
+import importlib.util
+from pathlib import Path
+
+# 1. Re-export standard library logging attributes
+_stdlib_logging_file = Path(sys.base_prefix) / "Lib" / "logging" / "__init__.py"
+if _stdlib_logging_file.exists():
+    _spec = importlib.util.spec_from_file_location("_stdlib_logging", _stdlib_logging_file)
+    _stdlib_logging = importlib.util.module_from_spec(_spec)
+    # Register in sys.modules if needed for submodules
+    _spec.loader.exec_module(_stdlib_logging)
+    for _attr in dir(_stdlib_logging):
+        if not _attr.startswith("__") or _attr in ("__all__", "__doc__"):
+            globals()[_attr] = getattr(_stdlib_logging, _attr)
+
+# 2. Export project-specific activity logger & CSV utilities
+from .activity_logger import (
+    logger,
+    init_data_stores,
+    save_buyers,
+    load_buyers,
+    save_classified_emails,
+    load_classified_emails,
+    get_sent_emails,
+    log_send_attempt,
+    load_sent_log,
+    audit_buyers_csv,
+    audit_sent_log,
+    normalize_buyer_record,
+    save_discovery_provenance,
+    load_discovery_provenance,
+    get_provenance_audit,
+    save_qualification_log,
+    load_qualification_log,
+    audit_qualification_log,
+    save_lead_review_decision,
+    load_lead_review_log,
+    get_lead_review_statuses,
+    audit_lead_review_log,
+    get_successful_sends_for_date,
+    get_real_sends_for_date,
+    get_test_simulations_for_date,
+    migrate_sent_log_schema,
+    SENT_LOG_FIELDS,
+    SEND_TYPE_REAL,
+    SEND_TYPE_TEST,
+    SEND_TYPE_LEGACY,
+    DEFAULT_PROVENANCE_FILE,
+    DEFAULT_QUALIFICATION_LOG_CSV,
+    DEFAULT_LEAD_REVIEW_LOG_CSV,
+    BUYER_SCHEMA_FIELDS,
+    QUALIFICATION_LOG_FIELDS,
+    LEAD_REVIEW_LOG_FIELDS,
+)
+
+__all__ = [
+    "logger",
+    "init_data_stores",
+    "save_buyers",
+    "load_buyers",
+    "save_classified_emails",
+    "load_classified_emails",
+    "get_sent_emails",
+    "log_send_attempt",
+    "load_sent_log",
+    "audit_buyers_csv",
+    "audit_sent_log",
+    "normalize_buyer_record",
+    "save_discovery_provenance",
+    "load_discovery_provenance",
+    "get_provenance_audit",
+    "save_qualification_log",
+    "load_qualification_log",
+    "audit_qualification_log",
+    "save_lead_review_decision",
+    "load_lead_review_log",
+    "get_lead_review_statuses",
+    "audit_lead_review_log",
+    "DEFAULT_PROVENANCE_FILE",
+    "DEFAULT_QUALIFICATION_LOG_CSV",
+    "DEFAULT_LEAD_REVIEW_LOG_CSV",
+    "BUYER_SCHEMA_FIELDS",
+    "QUALIFICATION_LOG_FIELDS",
+    "LEAD_REVIEW_LOG_FIELDS",
+    "get_successful_sends_for_date",
+    "get_real_sends_for_date",
+    "get_test_simulations_for_date",
+    "migrate_sent_log_schema",
+    "SENT_LOG_FIELDS",
+    "SEND_TYPE_REAL",
+    "SEND_TYPE_TEST",
+    "SEND_TYPE_LEGACY",
+]

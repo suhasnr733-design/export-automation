@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Campaign Details - {{ campaign.campaign_id }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Campaign Detail: {{ campaign.campaign_id }}</h1>
+    <p class="page-subtitle">Detailed execution metrics, recipient queue, and dispatch audit logs.</p>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <a href="{{ url_for('campaigns_list') }}" class="btn btn-secondary">&larr; All Campaigns</a>
+    {% if campaign.status.value in ('DRAFT', 'READY_FOR_REVIEW') %}
+      <a href="{{ url_for('campaign_send_view', campaign_id=campaign.campaign_id) }}" class="btn btn-warning">Review & Approve</a>
+    {% elif campaign.status.value == 'APPROVED' %}
+      <a href="{{ url_for('campaign_send_view', campaign_id=campaign.campaign_id) }}" class="btn btn-success">Execute Campaign</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Campaign Summary Cards -->
+<div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="kpi-card">
+    <div class="kpi-header"><span class="kpi-label">Audience</span></div>
+    <div class="kpi-value" style="font-size:1.4rem;">{{ campaign.target_audience|upper }}</div>
+    <div class="kpi-subtext">Target segment</div>
+  </div>
+
+  <div class="kpi-card biz">
+    <div class="kpi-header"><span class="kpi-label">Status</span></div>
+    <div class="kpi-value" style="font-size:1.4rem;">{{ campaign.status.value }}</div>
+    <div class="kpi-subtext">Lifecycle state</div>
+  </div>
+
+  <div class="kpi-card ind">
+    <div class="kpi-header"><span class="kpi-label">Eligible Queue</span></div>
+    <div class="kpi-value">{{ campaign.eligible_recipients }}</div>
+    <div class="kpi-subtext">of {{ campaign.total_recipients }} total</div>
+  </div>
+
+  <div class="kpi-card test">
+    <div class="kpi-header"><span class="kpi-label">Skipped Leads</span></div>
+    <div class="kpi-value">{{ campaign.skipped_recipients }}</div>
+    <div class="kpi-subtext">Duplicates / Limits</div>
+  </div>
+</div>
+
+<!-- Details & Log Table -->
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">📋 Campaign Dispatch Logs & Recipient Summary</h2>
+    <span class="badge badge-secondary">{{ log_records|length }} Logged Records</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Recipient</th>
+          <th>Company</th>
+          <th>Subject</th>
+          <th>Dispatch Status</th>
+          <th>Mode</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in log_records %}
+        <tr>
+          <td style="color:var(--text-muted);">{{ loop.index }}</td>
+          <td style="font-family:var(--font-mono); color:var(--text-primary);">{{ r.recipient }}</td>
+          <td>{{ r.company_name or '—' }}</td>
+          <td style="font-size:0.85rem; max-width:280px;">{{ r.subject }}</td>
+          <td>
+            {% if r.status in ('TEST_MODE_SUCCESS', 'SENT', 'SUCCESS') %}
+              <span class="badge badge-success">{{ r.status }}</span>
+            {% elif 'SKIPPED' in r.status %}
+              <span class="badge badge-warning">{{ r.status }}</span>
+            {% else %}
+              <span class="badge badge-danger">{{ r.status }}</span>
+            {% endif %}
+          </td>
+          <td><span class="badge badge-secondary">{{ r.mode }}</span></td>
+          <td style="font-size:0.8rem; color:var(--text-secondary);">{{ r.timestamp[:19].replace('T', ' ') }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" style="text-align:center; padding:3rem; color:var(--text-muted);">
+            No execution logs recorded for this campaign yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

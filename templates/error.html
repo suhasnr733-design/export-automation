@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}System Notification / Error{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 4rem auto; text-align:center;">
+  <div class="card" style="padding: 3rem 2rem;">
+    <div style="font-size:3.5rem; margin-bottom:1rem;">⚠️</div>
+    <h1 style="font-size:1.75rem; font-weight:800; color:#ffffff; margin-bottom:0.75rem;">
+      {{ error_title or "System Notice" }}
+    </h1>
+    <p style="color:var(--text-secondary); font-size:1rem; margin-bottom:2rem; line-height:1.6;">
+      {{ error_message or "An unexpected issue occurred while processing your request. Please review your parameters and try again." }}
+    </p>
+
+    <div style="display:flex; justify-content:center; gap:12px;">
+      <a href="javascript:history.back()" class="btn btn-secondary">&larr; Return to Previous Page</a>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+# ==============================================================================
+# Render Infrastructure-as-Code Specification (render.yaml)
+# Native Python 3 Web Service with Gunicorn WSGI & TEST_MODE Safety
+# ==============================================================================
+
+services:
+  - type: web
+    name: export-automation-dashboard
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 web_app:app
+    healthCheckPath: /health
+    envVars:
+      # Mandatory Safety Lock
+      - key: TEST_MODE
+        value: "true"
+      - key: FLASK_ENV
+        value: production
+      
+      # Discovery & Search Settings
+      - key: SEARCH_KEYWORD
+        value: "Singing Bowls"
+      - key: SEARCH_DELAY
+        value: "1.0"
+      - key: MAX_SEARCH_RESULTS
+        value: "15"
+      - key: MAX_WEBSITES_PER_RESULT
+        value: "5"
+      - key: TEST_DISCOVERY
+        value: "false"
+
+      # Outreach & Simulation Quotas
+      - key: DAILY_SEND_LIMIT
+        value: "10"
+      - key: TEST_SIMULATION_LIMIT
+        value: "50"
+      - key: SEND_DELAY
+        value: "5.0"
+      - key: PRESENTATION_PATH
+        value: "assets/company_presentation.pdf"
+
+      # AI Classification Settings
+      - key: CLASSIFICATION_LIVE
+        value: "false"
+      - key: CLASSIFICATION_BATCH_SIZE
+        value: "20"
+      - key: CLASSIFICATION_REVIEW_THRESHOLD
+        value: "0.70"

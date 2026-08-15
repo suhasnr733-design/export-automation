@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Campaign Preview & Personalization Check{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+  <div>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <h1 class="page-title" style="margin:0;">Campaign Outreach Preview</h1>
+      <span class="badge badge-success" style="font-size:0.85rem; padding:4px 10px; font-weight:800;">✓ APPROVED LEAD</span>
+      <span class="badge badge-warning" style="font-size:0.85rem; padding:4px 10px;">TEST SIMULATION ONLY</span>
+    </div>
+    <p class="page-subtitle">
+      Inspect the personalized email message and PDF attachment generated for <strong>{{ company_name }}</strong> before staging campaign execution.
+    </p>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <a href="{{ url_for('review_view') }}" class="btn btn-secondary">← Return to Lead Review</a>
+  </div>
+</div>
+
+<!-- Safety Notice Banner -->
+<div class="alert-box" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 24px; display:flex; align-items:center; gap:14px;">
+  <span style="font-size:1.6rem;">🔒</span>
+  <div>
+    <strong style="color: #34d399; text-transform:uppercase; letter-spacing:0.05em; font-size:0.85rem;">Safe Campaign Preview Gate</strong>
+    <p style="margin:2px 0 0; color:var(--text-secondary); font-size:0.875rem;">
+      This preview is strictly read-only and dispatches <strong>zero emails</strong>. Staging this lead will create a campaign in <code>READY_FOR_REVIEW</code> status, which requires an explicit second approval before any simulated execution.
+    </p>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+  
+  <!-- Left Column: Email Message Inspector -->
+  <div class="card" style="background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-lg); overflow:hidden;">
+    <div style="padding:16px 24px; background:var(--bg-surface-elevated); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+      <h2 style="margin:0; font-size:1.1rem; font-weight:700;">Personalized Message Preview</h2>
+      <span class="badge badge-info" style="font-family:var(--font-mono); font-size:0.8rem;">MIME: text/plain; charset=UTF-8</span>
+    </div>
+
+    <div style="padding:24px;">
+      <!-- Email Header Fields -->
+      <div style="background:var(--bg-main); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-color); margin-bottom:20px; display:grid; grid-template-columns:100px 1fr; row-gap:10px; font-size:0.92rem;">
+        <div style="color:var(--text-secondary); font-weight:600;">To:</div>
+        <div>
+          <code style="color:#60a5fa; font-weight:700;">{{ email }}</code>
+          <span style="color:var(--text-muted); margin-left:8px;">({{ company_name }})</span>
+        </div>
+
+        <div style="color:var(--text-secondary); font-weight:600;">From:</div>
+        <div>
+          <span style="color:var(--text-primary);">Himalayan Export Collective &lt;exports@himalayanartisans.example.com&gt;</span>
+        </div>
+
+        <div style="color:var(--text-secondary); font-weight:600;">Subject:</div>
+        <div>
+          <strong style="color:#f8fafc; font-size:0.95rem;">{{ subject }}</strong>
+        </div>
+
+        <div style="color:var(--text-secondary); font-weight:600;">Attachment:</div>
+        <div>
+          {% if attachment_meta.is_valid %}
+            <span class="badge badge-success" style="font-family:var(--font-mono); font-size:0.82rem;">
+              📎 {{ attachment_meta.filename }} ({{ "%.1f"|format(attachment_meta.size_bytes / (1024*1024)) }} MB &bull; Validated PDF)
+            </span>
+          {% else %}
+            <span class="badge badge-danger" style="font-size:0.82rem;">
+              ⚠️ {{ attachment_meta.filename }} (Missing or Invalid)
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Email Body -->
+      <div style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; font-weight:600;">
+        Rendered Message Body:
+      </div>
+      <div style="background:var(--bg-main); padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-color); font-family:var(--font-sans); line-height:1.7; font-size:0.92rem; color:var(--text-primary); white-space:pre-wrap;">{{ body }}</div>
+    </div>
+  </div>
+
+  <!-- Right Column: Verification Metadata & Stage Action -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+    
+    <!-- Lead Verification Audit Card -->
+    <div class="card" style="background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px;">
+      <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:14px;">
+        Lead Verification Checklist
+      </h3>
+
+      <div style="display:flex; flex-direction:column; gap:10px; font-size:0.88rem;">
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:var(--text-secondary);">Human Review:</span>
+          <span class="badge badge-success" style="font-weight:700;">APPROVED</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:var(--text-secondary);">Country Location:</span>
+          {% if is_country_unknown %}
+            <span class="badge badge-warning" style="font-size:0.8rem;">⚠️ {{ country_display }}</span>
+          {% else %}
+            <span style="color:var(--text-primary); font-weight:600;">{{ country_display }}</span>
+          {% endif %}
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:var(--text-secondary);">Safe Fallback Used:</span>
+          <code style="color:#a78bfa;">{{ "international markets" if is_country_unknown else country_display }}</code>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:var(--text-secondary);">Website:</span>
+          <span style="color:var(--accent-primary);">{{ buyer.website or "None" }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:var(--text-secondary);">Execution Mode:</span>
+          <span class="badge badge-warning" style="font-weight:700;">TEST SIMULATION</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage Campaign Action Card -->
+    <div class="card" style="background:var(--bg-surface-elevated); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px;">
+      <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:12px;">
+        Second Approval Gate Flow
+      </h3>
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;">
+        Staging this campaign will prepare a single-target campaign in <code>READY_FOR_REVIEW</code> status in the Campaign Store. You will be redirected to inspect and provide final sign-off before running the simulation.
+      </p>
+
+      <form action="{{ url_for('create_campaign_for_approved_lead') }}" method="POST">
+        <input type="hidden" name="email" value="{{ email }}">
+        <button type="submit" class="btn btn-primary" style="width:100%; font-weight:700; padding:10px 16px; display:flex; justify-content:center; align-items:center; gap:8px;">
+          <span>📋</span> Stage Test Campaign
+        </button>
+      </form>
+
+      <div style="margin-top:12px; text-align:center;">
+        <a href="{{ url_for('review_view') }}" style="font-size:0.85rem; color:var(--text-muted);">Cancel and Return</a>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

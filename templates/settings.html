@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">System Configuration & Safety Parameters</h1>
+    <p class="page-subtitle">Inspect search filters, AI classification thresholds, rate throttles, and credential statuses.</p>
+  </div>
+</div>
+
+<div class="grid-2">
+  
+  <!-- Safety & Execution Mode -->
+  <div class="card" style="border-left: 4px solid {% if config_data.TEST_MODE %}var(--accent-warning){% else %}var(--accent-success){% endif %};">
+    <div class="card-header">
+      <h2 class="card-title">🛡️ Safety & Execution Protection</h2>
+      <span class="badge {% if config_data.TEST_MODE %}badge-warning{% else %}badge-success{% endif %}">
+        {% if config_data.TEST_MODE %}TEST MODE: ON{% else %}LIVE MODE: ACTIVE{% endif %}
+      </span>
+    </div>
+
+    <div style="font-size:0.875rem; line-height:1.8; color:var(--text-primary);">
+      <div><strong>Safety Flag (TEST_MODE):</strong> <span style="font-family:var(--font-mono); color:{% if config_data.TEST_MODE %}#fbbf24{% else %}#34d399{% endif %}; font-weight:bold;">{{ config_data.TEST_MODE }}</span></div>
+      <div><strong>Execution Environment:</strong> <span style="font-family:var(--font-mono); color:var(--accent-info);">{{ config_data.EXECUTION_MODE }}</span></div>
+      <div><strong>SMTP Network Delivery:</strong> <span style="color:{% if config_data.TEST_MODE %}#fbbf24{% else %}#34d399{% endif %}; font-weight:600;">{% if config_data.TEST_MODE %}DISABLED (Simulated Logging Only){% else %}ENABLED (Active SMTP){% endif %}</span></div>
+      <div><strong>Credential Masking:</strong> <span style="color:#34d399; font-weight:600;">ACTIVE (Zero secret exposure in UI)</span></div>
+    </div>
+  </div>
+
+  <!-- Outreach & Delivery Throttles -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">✉️ Outreach Throttles & Rules</h2>
+      <span class="badge badge-secondary">Rate Limits</span>
+    </div>
+
+    <div style="font-size:0.875rem; line-height:1.8; color:var(--text-primary);">
+      <div><strong>Daily Send Limit:</strong> <span style="font-family:var(--font-mono); font-weight:bold;">{{ config_data.DAILY_SEND_LIMIT }} messages / calendar day</span></div>
+      <div><strong>Sequential Send Delay:</strong> <span style="font-family:var(--font-mono); font-weight:bold;">{{ config_data.SEND_DELAY }} seconds</span></div>
+      <div><strong>CC Monitoring Address:</strong> <span style="font-family:var(--font-mono);">{{ config_data.CC_MONITOR_EMAIL or 'None configured' }}</span></div>
+      <div><strong>Presentation File:</strong> <span style="font-family:var(--font-mono); font-size:0.8rem;">{{ config_data.PRESENTATION_PATH }}</span></div>
+    </div>
+  </div>
+
+  <!-- Discovery & Search Parameters -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">🔍 Buyer Discovery Configuration</h2>
+      <span class="badge badge-secondary">Search Engine</span>
+    </div>
+
+    <div style="font-size:0.875rem; line-height:1.8; color:var(--text-primary);">
+      <div><strong>Default Search Keyword:</strong> <span style="font-family:var(--font-mono); color:#ffffff; font-weight:bold;">{{ config_data.SEARCH_KEYWORD }}</span></div>
+      <div><strong>Max Search Results:</strong> <span style="font-family:var(--font-mono);">{{ config_data.MAX_SEARCH_RESULTS }} leads</span></div>
+      <div><strong>Max Websites Per Search:</strong> <span style="font-family:var(--font-mono);">{{ config_data.MAX_WEBSITES_PER_RESULT }} domains</span></div>
+      <div><strong>Search Request Delay:</strong> <span style="font-family:var(--font-mono);">{{ config_data.SEARCH_DELAY }} seconds</span></div>
+    </div>
+  </div>
+
+  <!-- AI & API Integration Readiness -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">🤖 AI & Cloud API Status</h2>
+      <span class="badge badge-secondary">Integrations</span>
+    </div>
+
+    <div style="font-size:0.875rem; line-height:1.8; color:var(--text-primary);">
+      <div>
+        <strong>Gemini AI Configured:</strong>
+        <span class="badge {% if is_gemini_ready %}badge-success{% else %}badge-secondary{% endif %}">
+          {% if is_gemini_ready %}YES (Key Detected){% else %}NO (Using Local Test Mode){% endif %}
+        </span>
+      </div>
+      <div style="margin-top:8px;">
+        <strong>Gmail Sender Configured:</strong>
+        <span class="badge {% if is_gmail_ready %}badge-success{% else %}badge-secondary{% endif %}">
+          {% if is_gmail_ready %}YES ({{ masked_sender }}){% else %}NO (Test Mode Only){% endif %}
+        </span>
+      </div>
+      <div style="margin-top:8px;">
+        <strong>Classification Batch Size:</strong> <span style="font-family:var(--font-mono);">{{ config_data.CLASSIFICATION_BATCH_SIZE }} contacts / batch</span>
+      </div>
+      <div>
+        <strong>Review Flag Threshold:</strong> <span style="font-family:var(--font-mono);">&lt; {{ (config_data.CLASSIFICATION_REVIEW_THRESHOLD * 100)|round }}% confidence</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

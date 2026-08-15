@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics & Reports{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Executive Analytics & Outreach Reports</h1>
+    <p class="page-subtitle">Consolidated intelligence on buyer discovery, AI segmentation accuracy, and campaign throughput.</p>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <a href="{{ url_for('download_report') }}" class="btn btn-primary">📥 Download Full CSV Report</a>
+  </div>
+</div>
+
+<!-- Primary Report KPIs -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-header"><span class="kpi-label">Total Discovered</span></div>
+    <div class="kpi-value">{{ buyers_audit.total_records }}</div>
+    <div class="kpi-subtext">Importers & trade leads</div>
+  </div>
+
+  <div class="kpi-card biz">
+    <div class="kpi-header"><span class="kpi-label">Valid Emails</span></div>
+    <div class="kpi-value">{{ buyers_audit.unique_emails }}</div>
+    <div class="kpi-subtext">Deliverable syntax</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-header"><span class="kpi-label">B2B Share</span></div>
+    <div class="kpi-value">
+      {% if buyers_audit.total_records > 0 %}
+        {{ ((classified_emails.business|length / buyers_audit.total_records) * 100)|round }}%
+      {% else %}
+        0%
+      {% endif %}
+    </div>
+    <div class="kpi-subtext">{{ classified_emails.business|length }} Wholesale Buyers</div>
+  </div>
+
+  <div class="kpi-card test">
+    <div class="kpi-header"><span class="kpi-label">Test-Mode Dispatches</span></div>
+    <div class="kpi-value">{{ sent_audit.test_mode_records }}</div>
+    <div class="kpi-subtext">Simulated validations</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-header"><span class="kpi-label">Live Sends</span></div>
+    <div class="kpi-value">{{ sent_audit.successful_sends }}</div>
+    <div class="kpi-subtext">Production deliveries</div>
+  </div>
+
+  <div class="kpi-card fail">
+    <div class="kpi-header"><span class="kpi-label">Errors / Failures</span></div>
+    <div class="kpi-value">{{ sent_audit.failed_sends }}</div>
+    <div class="kpi-subtext">Delivery exceptions</div>
+  </div>
+</div>
+
+<!-- Visual Breakdown Grid -->
+<div class="grid-2">
+  
+  <!-- Country Breakdown Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">🌐 Geographic Distribution</h2>
+      <span class="badge badge-secondary">{{ country_dist|length }} Countries</span>
+    </div>
+
+    {% for country, count in country_dist.items() %}
+    <div class="progress-container">
+      <div class="progress-header">
+        <span><strong>{{ country }}</strong></span>
+        <span>{{ count }} buyers ({{ (count / (buyers_audit.total_records or 1) * 100)|round }}%)</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width: {{ (count / (buyers_audit.total_records or 1) * 100)|round }}%;"></div>
+      </div>
+    </div>
+    {% else %}
+    <p style="color:var(--text-muted); font-size:0.85rem;">No country records available.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Channel & Platform Distribution Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📡 Discovery Channel Yield</h2>
+      <span class="badge badge-secondary">5 Channels</span>
+    </div>
+
+    {% for platform, count in buyers_audit.platform_distribution.items() %}
+    <div class="progress-container">
+      <div class="progress-header">
+        <span><strong>{{ platform }}</strong></span>
+        <span>{{ count }} leads ({{ (count / (buyers_audit.total_records or 1) * 100)|round }}%)</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width: {{ (count / (buyers_audit.total_records or 1) * 100)|round }}%; background: var(--accent-secondary);"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<!-- Recent Dispatch Audit Table -->
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">📜 Outreach History Audit (data/sent_log.csv)</h2>
+    <span class="badge badge-secondary">{{ sent_logs|length }} Historical Entries</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Recipient Address</th>
+          <th>Dispatch Outcome</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in sent_logs[-15:]|reverse %}
+        <tr>
+          <td style="color:var(--text-muted);">{{ loop.index }}</td>
+          <td style="font-family:var(--font-mono); color:var(--text-primary);">{{ r.email }}</td>
+          <td>
+            {% if r.status in ('TEST_MODE_SUCCESS', 'SENT', 'SUCCESS') %}
+              <span class="badge badge-success">{{ r.status }}</span>
+            {% elif 'SKIPPED' in r.status %}
+              <span class="badge badge-warning">{{ r.status }}</span>
+            {% else %}
+              <span class="badge badge-danger">{{ r.status }}</span>
+            {% endif %}
+          </td>
+          <td style="font-size:0.85rem; color:var(--text-secondary);">{{ r.timestamp }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" style="text-align:center; padding:2rem; color:var(--text-muted);">
+            No sent log entries recorded yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

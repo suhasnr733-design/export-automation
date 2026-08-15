@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Buyer Leads{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Ingest Buyer Lead Lists</h1>
+    <p class="page-subtitle">Upload CSV contact spreadsheets with pre-validation, deduplication, and safe merge control.</p>
+  </div>
+</div>
+
+<div class="grid-2">
+  
+  <!-- Upload Form Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📤 Select CSV Spreadsheet</h2>
+      <span class="card-subtitle">Supported format: .csv</span>
+    </div>
+
+    <form action="{{ url_for('upload_buyers') }}" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label class="form-label" for="csv_file">Upload Contact List (CSV)</label>
+        <input type="file" id="csv_file" name="csv_file" accept=".csv" class="form-control" required>
+        <div class="form-help">Ensure your file contains an <code>email</code> column. Standard headers are auto-detected.</div>
+      </div>
+
+      <div style="margin-top: 1.5rem;">
+        <button type="submit" class="btn btn-primary">🔍 Inspect & Preview List</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Expected Schema Guide -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📋 Standard Buyer Schema</h2>
+      <span class="badge badge-secondary">CSV Columns</span>
+    </div>
+
+    <p style="font-size:0.875rem; color:var(--text-secondary); margin-bottom:1rem;">
+      Your CSV should ideally include the following headers for maximum enrichment and personalization:
+    </p>
+
+    <div style="background:var(--bg-surface-elevated); padding:14px; border-radius:var(--radius-md); font-family:var(--font-mono); font-size:0.8rem; line-height:1.8; color:#ffffff;">
+      <strong>buyer_name</strong> &mdash; Full name or contact title<br>
+      <strong>company_name</strong> &mdash; Registered trade or wholesale entity<br>
+      <strong>email</strong> &mdash; Valid business / personal address <span style="color:#34d399;">(Required)</span><br>
+      <strong>website</strong> &mdash; Company or profile URL<br>
+      <strong>country</strong> &mdash; Buyer country / territory<br>
+      <strong>source_platform</strong> &mdash; Origin channel (e.g. Trade Fair, Directory, Website)
+    </div>
+  </div>
+
+</div>
+
+<!-- Upload Preview Section (if file was submitted) -->
+{% if preview_data %}
+<div class="card" style="border-color: var(--accent-primary);">
+  <div class="card-header">
+    <div>
+      <h2 class="card-title">🔍 Ingestion Audit & Preview: {{ preview_data.filename }}</h2>
+      <span class="card-subtitle">Review before merging into production datastore</span>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button type="button" onclick="openModal('confirmMergeModal')" class="btn btn-success" {% if preview_data.new_valid_records|length == 0 %}disabled{% endif %}>
+        ✓ Confirm & Merge ({{ preview_data.new_valid_records|length }} New Leads)
+      </button>
+    </div>
+  </div>
+
+  <!-- Ingestion KPI Metrics -->
+  <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom:1.5rem;">
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Uploaded Rows</span></div>
+      <div class="kpi-value">{{ preview_data.total_rows }}</div>
+    </div>
+    <div class="kpi-card biz">
+      <div class="kpi-header"><span class="kpi-label">New Valid Leads</span></div>
+      <div class="kpi-value">{{ preview_data.new_valid_records|length }}</div>
+    </div>
+    <div class="kpi-card test">
+      <div class="kpi-header"><span class="kpi-label">Duplicates Skipped</span></div>
+      <div class="kpi-value">{{ preview_data.duplicate_count }}</div>
+    </div>
+    <div class="kpi-card fail">
+      <div class="kpi-header"><span class="kpi-label">Invalid Syntax</span></div>
+      <div class="kpi-value">{{ preview_data.invalid_count }}</div>
+    </div>
+  </div>
+
+  <!-- Preview Table -->
+  <h3 style="font-size:0.95rem; font-weight:700; color:#ffffff; margin-bottom:10px;">New Eligible Records Preview:</h3>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Buyer Name</th>
+          <th>Company</th>
+          <th>Email Address</th>
+          <th>Country</th>
+          <th>Platform</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in preview_data.new_valid_records[:10] %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ r.buyer_name or '—' }}</td>
+          <td>{{ r.company_name or '—' }}</td>
+          <td style="font-family:var(--font-mono);">{{ r.email }}</td>
+          <td>{{ r.country or '—' }}</td>
+          <td><span class="badge badge-secondary">{{ r.source_platform or 'CSV Upload' }}</span></td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">
+            No new unique records detected in this file. (All rows are duplicates or invalid).
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: Confirm Merge -->
+<div class="modal-backdrop" id="confirmMergeModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Confirm Lead Ingestion</h3>
+      <button onclick="closeModal('confirmMergeModal')" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.5rem;">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to merge <strong>{{ preview_data.new_valid_records|length }} new buyer records</strong> into <code>data/buyers.csv</code>?</p>
+      <p style="margin-top:8px; font-size:0.85rem; color:var(--text-muted);">Existing records will be safely preserved without duplicates.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" onclick="closeModal('confirmMergeModal')" class="btn btn-secondary">Cancel</button>
+      <form action="{{ url_for('confirm_upload') }}" method="POST">
+        <input type="hidden" name="upload_token" value="{{ preview_data.token }}">
+        <button type="submit" class="btn btn-success">✓ Yes, Merge Records</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
