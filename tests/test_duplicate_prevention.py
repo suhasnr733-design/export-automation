@@ -6,7 +6,7 @@ import pytest
 from pathlib import Path
 from outreach.gmail_sender import GmailSender
 from outreach.attachment_handler import AttachmentHandler, AttachmentError
-from logging.activity_logger import log_send_attempt, get_sent_emails
+from app_logging.activity_logger import log_send_attempt, get_sent_emails
 
 
 def test_gmail_sender_test_mode_simulation(tmp_path):

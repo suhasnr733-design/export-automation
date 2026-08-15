@@ -11,7 +11,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from config import Config
-from logging.activity_logger import logger
+from app_logging.activity_logger import logger
 
 
 class CampaignStatus(str, Enum):

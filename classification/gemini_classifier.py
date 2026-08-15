@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Tuple, Optional, Set
 
 from config import Config
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     logger,
     load_buyers,
     save_classified_emails,

@@ -161,7 +161,7 @@ def test_confirm_staged_upload_flow(client: FlaskClient, tmp_path, monkeypatch):
     monkeypatch.setattr(Config, "DATA_DIR", test_data_dir)
     monkeypatch.setattr(Config, "BUYERS_CSV", test_data_dir / "buyers.csv")
 
-    from logging.activity_logger import init_data_stores, load_buyers
+    from app_logging.activity_logger import init_data_stores, load_buyers
     init_data_stores(base_dir=tmp_path)
 
     # Stage an upload token
@@ -212,7 +212,7 @@ def test_campaign_creation_approval_and_execution_flow(client: FlaskClient, tmp_
     monkeypatch.setattr(Config, "SENT_LOG_CSV", test_data_dir / "sent_log.csv")
     monkeypatch.setattr(Config, "CAMPAIGN_LOG_CSV", test_data_dir / "campaign_log.csv")
 
-    from logging.activity_logger import init_data_stores, save_buyers, save_classified_emails
+    from app_logging.activity_logger import init_data_stores, save_buyers, save_classified_emails
     init_data_stores(base_dir=tmp_path)
 
     # Seed buyer
@@ -302,3 +302,29 @@ def test_credentials_never_exposed_in_responses(client: FlaskClient, monkeypatch
         body = resp.data.decode("utf-8")
         assert fake_secret_key not in body, f"Gemini API key leaked in route: {route}"
         assert fake_app_password not in body, f"Gmail app password leaked in route: {route}"
+
+
+# ==============================================================================
+# 7. Regression: Render Logging Collision Prevention Test
+# ==============================================================================
+def test_web_app_import_no_logging_collision():
+    """Regression test proving web_app.py can be imported cleanly alongside stdlib logging."""
+    import logging
+    import logging.config
+    import sys
+
+    # Assert standard library logging attributes are intact
+    assert hasattr(logging, "getLogger")
+    assert hasattr(logging, "basicConfig")
+
+    # Import web_app and verify Flask instance is healthy
+    import web_app
+    assert hasattr(web_app, "app")
+    assert web_app.app.name == "web_app"
+
+    # Verify custom app_logging package is cleanly decoupled
+    import app_logging
+    import app_logging.activity_logger
+    assert hasattr(app_logging, "logger")
+    assert hasattr(app_logging.activity_logger, "init_data_stores")
+

@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Dict, Any, Optional, Tuple
 from config import Config
-from logging.activity_logger import logger
+from app_logging.activity_logger import logger
 
 
 class PersonalizationEngine:

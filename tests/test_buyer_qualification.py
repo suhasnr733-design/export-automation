@@ -25,7 +25,7 @@ from qualification.buyer_qualifier import (
     qualify_live_buyers,
     expand_product_keywords,
 )
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     init_data_stores,
     save_buyers,
     load_buyers,

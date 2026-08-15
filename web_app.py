@@ -29,7 +29,7 @@ from flask import (
 from werkzeug.utils import secure_filename
 
 from config import Config
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     init_data_stores,
     load_buyers,
     save_buyers,

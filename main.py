@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 from config import Config
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     logger,
     init_data_stores,
     save_buyers,

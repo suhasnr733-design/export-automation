@@ -13,7 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from config import Config
-from logging.activity_logger import logger
+from app_logging.activity_logger import logger
 from extraction.data_extractor import (
     extract_buyers_from_website,
     extract_emails_from_html,

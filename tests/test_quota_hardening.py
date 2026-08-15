@@ -23,7 +23,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from config import Config
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     init_data_stores,
     log_send_attempt,
     load_sent_log,

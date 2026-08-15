@@ -22,7 +22,7 @@ from unittest.mock import patch, MagicMock
 
 from config import Config
 from web_app import app
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     init_data_stores,
     save_buyers,
     save_discovery_provenance,

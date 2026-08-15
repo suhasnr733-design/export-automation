@@ -17,7 +17,7 @@ from extraction.data_extractor import (
     extract_buyers_from_website,
     extract_buyers_from_search_results,
 )
-from logging.activity_logger import save_buyers, load_buyers
+from app_logging.activity_logger import save_buyers, load_buyers
 
 
 def test_query_builder_default_modifiers():

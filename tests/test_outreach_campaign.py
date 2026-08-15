@@ -29,7 +29,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from config import Config
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     init_data_stores,
     save_buyers,
     save_classified_emails,

@@ -1,26 +1,10 @@
 """
-Logging and CSV Activity Storage Package.
+Application Logging and CSV Activity Storage Package.
 
-Bridges standard library logging with project-specific activity logger and CSV stores,
-ensuring full compatibility across all third-party libraries and internal modules.
+Provides project-specific activity logger and CSV stores for buyers, classifications,
+qualifications, lead reviews, provenance, and send history.
 """
 
-import sys
-import importlib.util
-from pathlib import Path
-
-# 1. Re-export standard library logging attributes
-_stdlib_logging_file = Path(sys.base_prefix) / "Lib" / "logging" / "__init__.py"
-if _stdlib_logging_file.exists():
-    _spec = importlib.util.spec_from_file_location("_stdlib_logging", _stdlib_logging_file)
-    _stdlib_logging = importlib.util.module_from_spec(_spec)
-    # Register in sys.modules if needed for submodules
-    _spec.loader.exec_module(_stdlib_logging)
-    for _attr in dir(_stdlib_logging):
-        if not _attr.startswith("__") or _attr in ("__all__", "__doc__"):
-            globals()[_attr] = getattr(_stdlib_logging, _attr)
-
-# 2. Export project-specific activity logger & CSV utilities
 from .activity_logger import (
     logger,
     init_data_stores,

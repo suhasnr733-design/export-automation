@@ -176,7 +176,7 @@ export-automation/
 │   ├── personalization.py      # Template variable interpolation
 │   └── attachment_handler.py   # PDF presentation validation & MIME attachment
 │
-├── logging/                    # Logging, CSV data persistence & provenance
+├── app_logging/                # Logging, CSV data persistence & provenance
 │   ├── __init__.py
 │   └── activity_logger.py      # Thread-safe CSV datastore manager
 │

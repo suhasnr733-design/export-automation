@@ -13,6 +13,10 @@ services:
     startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 web_app:app
     healthCheckPath: /health
     envVars:
+      # Python Runtime Version
+      - key: PYTHON_VERSION
+        value: "3.12.10"
+
       # Mandatory Safety Lock
       - key: TEST_MODE
         value: "true"

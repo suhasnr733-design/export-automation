@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple, Set
 
 from config import Config
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     logger,
     init_data_stores,
     load_buyers,

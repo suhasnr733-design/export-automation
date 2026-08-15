@@ -13,7 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from config import Config
-from logging.activity_logger import logger
+from app_logging.activity_logger import logger
 from .query_builder import SearchQueryBuilder
 from .search_cache import SearchCache
 

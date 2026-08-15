@@ -14,7 +14,7 @@ from email.mime.text import MIMEText
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from config import Config
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     logger,
     log_send_attempt,
     get_sent_emails,

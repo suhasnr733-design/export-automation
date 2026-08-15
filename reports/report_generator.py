@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any
 from config import Config
-from logging.activity_logger import logger
+from app_logging.activity_logger import logger
 
 
 @dataclass

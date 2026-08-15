@@ -29,7 +29,7 @@ from classification.gemini_classifier import (
     classify_contacts_detailed,
     run_classification_pipeline,
 )
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     init_data_stores,
     save_buyers,
     load_buyers,

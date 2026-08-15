@@ -1,7 +1,7 @@
 import re
 from typing import List, Dict, Any, Optional
 from config import Config
-from logging.activity_logger import logger
+from app_logging.activity_logger import logger
 
 
 class FacebookSearchAdapter:

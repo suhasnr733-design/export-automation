@@ -10,7 +10,7 @@ Outputs structured audit records with explicit ACCEPT / REJECT decisions and jus
 
 import re
 from typing import Dict, Any, List, Optional, Tuple
-from logging.activity_logger import logger
+from app_logging.activity_logger import logger
 
 # Product category keyword expansion dictionaries
 PRODUCT_SYNONYMS: Dict[str, List[str]] = {

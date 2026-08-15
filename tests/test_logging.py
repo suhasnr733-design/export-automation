@@ -5,7 +5,7 @@ Unit tests for Logging and CSV Data Stores.
 import csv
 import pytest
 from pathlib import Path
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     init_data_stores,
     save_buyers,
     load_buyers,
@@ -117,3 +117,20 @@ def test_log_send_attempt_and_sent_history(temp_data_dir):
 
     logs = load_sent_log(csv_path=sent_file)
     assert len(logs) == 3
+
+
+def test_stdlib_logging_not_shadowed():
+    """Verify that Python standard-library logging is not shadowed by app_logging."""
+    import logging
+    import logging.config
+    import logging.handlers
+
+    assert hasattr(logging, "getLogger")
+    assert hasattr(logging, "basicConfig")
+    assert hasattr(logging, "StreamHandler")
+    assert hasattr(logging, "FileHandler")
+
+    # Standard library logging file should be part of Python lib, not local workspace
+    log_file = getattr(logging, "__file__", "")
+    assert "app_logging" not in log_file
+

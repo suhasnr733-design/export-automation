@@ -13,7 +13,7 @@ Covers all Phase 2 verification requirements:
 
 import pytest
 from pathlib import Path
-from logging.activity_logger import (
+from app_logging.activity_logger import (
     init_data_stores,
     save_buyers,
     load_buyers,

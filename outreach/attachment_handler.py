@@ -8,7 +8,7 @@ from email.mime.application import MIMEApplication
 from pathlib import Path
 from typing import Optional, Tuple, Dict, Any, Set
 from config import Config
-from logging.activity_logger import logger
+from app_logging.activity_logger import logger
 
 
 class AttachmentError(Exception):
