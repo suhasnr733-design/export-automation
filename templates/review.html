@@ -56,6 +56,72 @@
   </div>
 </div>
 
+<!-- Live Web Discovery Action Panel -->
+<div class="card" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 22px 26px; margin-bottom: 28px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size:1.4rem;">🌐</span>
+      <div>
+        <h2 style="margin:0; font-size:1.1rem; font-weight:700; color:var(--text-primary);">Live Web Buyer Discovery</h2>
+        <p style="margin:2px 0 0; color:var(--text-secondary); font-size:0.85rem;">
+          Discover real international importers, distributors, and wholesale buyers across public web endpoints.
+        </p>
+      </div>
+    </div>
+    <span class="badge badge-info" style="font-size:0.8rem; padding:4px 10px;">
+      SAFE: Deduplicates against buyers.csv & sent_log
+    </span>
+  </div>
+
+  <form action="{{ url_for('run_discovery_action') }}" method="POST" style="display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap;">
+    <div style="flex:2; min-width:240px;">
+      <label for="keyword" style="display:block; font-size:0.85rem; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">
+        Target Product Keyword:
+      </label>
+      <input 
+        type="text" 
+        id="keyword" 
+        name="keyword" 
+        value="{{ current_keyword or config_data.SEARCH_KEYWORD }}" 
+        required 
+        class="form-control" 
+        style="width:100%; padding:10px 14px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-primary); font-size:0.92rem;" 
+        placeholder="e.g. Handmade Pashmina, Singing Bowls, Organic Tea"
+      >
+    </div>
+
+    <div style="flex:1; min-width:140px;">
+      <label for="max_results" style="display:block; font-size:0.85rem; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">
+        Max Results:
+      </label>
+      <select 
+        id="max_results" 
+        name="max_results" 
+        class="form-control" 
+        style="width:100%; padding:10px 14px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-primary); font-size:0.92rem;"
+      >
+        <option value="5">5 Results</option>
+        <option value="10">10 Results</option>
+        <option value="15" selected>15 Results</option>
+        <option value="20">20 Results</option>
+      </select>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:8px; padding-bottom:8px; min-width:140px;">
+      <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-secondary); cursor:pointer;">
+        <input type="checkbox" name="force_refresh" value="true">
+        <span>Force Fresh Search</span>
+      </label>
+    </div>
+
+    <div style="margin-bottom:0;">
+      <button type="submit" class="btn btn-primary" style="padding:10px 22px; font-weight:700; display:flex; align-items:center; gap:8px;">
+        <span>🔍</span> Discover New Leads
+      </button>
+    </div>
+  </form>
+</div>
+
 <!-- Candidates Review Cards -->
 {% if candidates %}
   <div style="display:flex; flex-direction:column; gap:24px;">

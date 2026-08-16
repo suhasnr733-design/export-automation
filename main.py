@@ -90,22 +90,25 @@ def run_discovery_only(
     keyword: Optional[str] = None,
     max_results: Optional[int] = None,
     data_dir: Optional[Path] = None,
+    force_refresh: bool = False,
 ) -> Dict[str, Any]:
     """
     Execute standalone Phase 2 Real Buyer Discovery workflow.
     Discovers potential export buyers, extracts details, validates emails,
-    deduplicates against existing data, and persists to data/buyers.csv.
+    deduplicates against existing data and sent logs, and persists to data/buyers.csv.
     """
     search_keyword = keyword or Config.SEARCH_KEYWORD
     limit = max_results or Config.MAX_SEARCH_RESULTS
     target_data_dir = data_dir or Config.DATA_DIR
     buyers_csv_path = target_data_dir / "buyers.csv"
+    sent_log_path = target_data_dir / "sent_log.csv"
 
     init_data_stores(base_dir=target_data_dir.parent if target_data_dir.name == "data" else target_data_dir)
 
     # 1. Inspect existing datastore state
     existing_buyers = load_buyers(buyers_csv_path)
     existing_emails = {b["email"].lower() for b in existing_buyers if b.get("email")}
+    sent_emails = {s["email"].strip().lower() for s in load_sent_log(sent_log_path) if s.get("email")} if sent_log_path.exists() else set()
 
     print("\n" + "=" * 60)
     print("             REAL BUYER DISCOVERY PIPELINE")
@@ -115,6 +118,7 @@ def run_discovery_only(
     print(f"Discovery Mode  : {'TEST DISCOVERY' if Config.TEST_DISCOVERY else 'LIVE WEB DISCOVERY'}")
     print(f"Target Store    : {buyers_csv_path.name}")
     print(f"Existing Buyers : {len(existing_buyers)}")
+    print(f"Sent / Logged   : {len(sent_emails)}")
     print("-" * 60)
 
     # 2. Build Multi-source Queries
@@ -127,7 +131,7 @@ def run_discovery_only(
 
     # Google Search Adapter (LIVE)
     google_adapter = GoogleSearchAdapter(max_results=limit, test_discovery=Config.TEST_DISCOVERY)
-    google_results = google_adapter.search(search_keyword)
+    google_results = google_adapter.search(search_keyword, force_refresh=force_refresh)
     raw_search_results.extend(google_results)
     source_statuses["Google Search"] = "LIVE" if not Config.TEST_DISCOVERY else "TEST_DISCOVERY"
 
@@ -194,14 +198,14 @@ def run_discovery_only(
     # 6. Email Validation & Syntax Verification
     valid_buyers, invalid_buyers = validate_buyer_records(discovered_buyers)
 
-    # 7. Deduplication against data/buyers.csv (DISCOVERY DEDUPLICATION)
+    # 7. Deduplication against data/buyers.csv and data/sent_log.csv (DISCOVERY DEDUPLICATION)
     unique_new_buyers = []
     duplicate_count = 0
     seen_in_batch = set()
 
     for buyer in valid_buyers:
         norm_email = buyer["email"].lower()
-        if norm_email in seen_in_batch or norm_email in existing_emails:
+        if norm_email in seen_in_batch or norm_email in existing_emails or norm_email in sent_emails:
             duplicate_count += 1
         else:
             seen_in_batch.add(norm_email)

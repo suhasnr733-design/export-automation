@@ -420,6 +420,7 @@ class GoogleSearchAdapter:
         keyword: str,
         max_results: Optional[int] = None,
         use_live_web: Optional[bool] = None,
+        force_refresh: bool = False,
     ) -> List[Dict[str, Any]]:
         """
         Execute multi-query search for prospective buyers across public search engines.
@@ -439,8 +440,8 @@ class GoogleSearchAdapter:
             for q in queries:
                 logger.info(f"[{self.PLATFORM_NAME}] Query: '{q}'")
 
-                # Check keyword-isolated cache
-                cached_items = self.cache.get(keyword, q, self.PLATFORM_NAME)
+                # Check keyword-isolated cache (bypass if force_refresh=True)
+                cached_items = self.cache.get(keyword, q, self.PLATFORM_NAME) if not force_refresh else None
                 if cached_items is not None:
                     items = cached_items
                 else:

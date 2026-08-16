@@ -379,8 +379,51 @@ def run_classification_action():
 
 
 # ==============================================================================
-# 5. HUMAN LEAD REVIEW & CAMPAIGN PREVIEW (Route: /review, /review/decision, /review/preview)
+# 5. HUMAN LEAD REVIEW & CAMPAIGN PREVIEW (Route: /review, /discover/run, /review/decision, /review/preview)
 # ==============================================================================
+@app.route("/discover/run", methods=["POST"])
+def run_discovery_action():
+    """Execute live web discovery pipeline for prospective buyer leads."""
+    keyword = request.form.get("keyword", "").strip() or Config.SEARCH_KEYWORD
+    raw_limit = request.form.get("max_results", "")
+    try:
+        max_results = int(raw_limit) if raw_limit else Config.MAX_SEARCH_RESULTS
+    except (ValueError, TypeError):
+        max_results = Config.MAX_SEARCH_RESULTS
+
+    force_refresh = request.form.get("force_refresh", "").lower() in ("true", "1", "yes", "on")
+
+    try:
+        from main import run_discovery_only
+        summary = run_discovery_only(
+            keyword=keyword,
+            max_results=max_results,
+            data_dir=Config.DATA_DIR,
+            force_refresh=force_refresh,
+        )
+
+        records_written = summary.get("records_written", 0)
+        duplicates = summary.get("duplicates_removed", 0)
+        total_discovered = summary.get("potential_buyers", 0) or summary.get("emails_discovered", 0)
+
+        if records_written > 0:
+            flash(
+                f"Live Web Discovery complete for '{keyword}': Discovered {total_discovered} contact(s), "
+                f"added {records_written} new lead(s) to the review queue ({duplicates} duplicate/already-contacted skipped).",
+                "success",
+            )
+        else:
+            flash(
+                f"Live Web Discovery complete for '{keyword}': Discovered {total_discovered} contact(s), "
+                f"but 0 new leads were added ({duplicates} duplicate/already-contacted skipped).",
+                "info",
+            )
+    except Exception as e:
+        flash(f"Live Discovery failed: {str(e)}", "error")
+
+    return redirect(url_for("review_view"))
+
+
 @app.route("/review")
 def review_view():
     """Display qualified leads for explicit human review before outreach approval."""
@@ -460,7 +503,7 @@ def review_view():
             "website": b.get("website", ""),
             "country_display": country_display,
             "is_country_unknown": is_country_unknown,
-            "product": qual.get("product", Config.SEARCH_KEYWORD or "Export Products"),
+            "product": qual.get("product", prov_records.get(em, {}).get("keyword") or Config.SEARCH_KEYWORD or "Export Products"),
             "business_status": qual.get("business_status", class_rec.get("category", "business")),
             "confidence": class_rec.get("confidence", "0.95"),
             "buyer_intent": b_intent,
@@ -493,6 +536,7 @@ def review_view():
         candidates=candidates,
         total_candidates=len(candidates),
         review_audit=review_audit,
+        current_keyword=prov_data.get("metadata", {}).get("last_discovery_keyword", Config.SEARCH_KEYWORD),
     )
 
 
