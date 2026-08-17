@@ -3,6 +3,7 @@ Gmail Authentication and SMTP Client Manager.
 Provides authenticated SMTP sessions for Gmail outreach while securing credentials.
 """
 
+import os
 import socket
 import smtplib
 import ssl
@@ -67,11 +68,22 @@ class GmailAuth:
             logger.error("Gmail SMTP authentication failed. Check your App Password in Google Account settings.")
             raise ConnectionError("Invalid Gmail App Password or Account credentials.") from e
         except Exception as e:
+            docker_hint = ""
+            # Check if running inside a Docker container to provide a more specific hint.
+            if os.path.exists('/.dockerenv'):
+                docker_hint = (
+                    "Hint: The application appears to be running inside a Docker container. "
+                    "This error often indicates a Docker networking issue. Please verify that your "
+                    "container has outbound internet access and that the host machine's firewall is not "
+                    "blocking Docker's traffic."
+                )
+
             error_message = (
                 f"SMTP Connection Error: All connection attempts failed. Last error: {e}. "
                 "Please check your internet connection, firewall settings, and ensure "
-                f"outbound access to {self.SMTP_HOST} on ports {self.SMTP_PORT_SSL} or {self.SMTP_PORT_TLS} is allowed."
-            )
+                f"outbound access to {self.SMTP_HOST} on ports {self.SMTP_PORT_SSL} or {self.SMTP_PORT_TLS} is allowed. "
+                f"{docker_hint}"
+            ).strip()
             logger.error(error_message)
             raise ConnectionError(error_message) from e
 
