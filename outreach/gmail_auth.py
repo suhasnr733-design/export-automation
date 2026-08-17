@@ -5,7 +5,7 @@ Provides authenticated SMTP sessions for Gmail outreach while securing credentia
 
 import smtplib
 import ssl
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 from config import Config
 from app_logging.activity_logger import logger
 
@@ -31,7 +31,7 @@ class GmailAuth:
             return False, "GMAIL_APP_PASSWORD is not set in configuration or .env."
         return True, "Credentials format verified."
 
-    def connect(self) -> smtplib.SMTP_SSL:
+    def connect(self) -> Union[smtplib.SMTP_SSL, smtplib.SMTP]:
         """
         Establish an authenticated SSL connection with Gmail SMTP.
         Never logs or outputs the app password.
