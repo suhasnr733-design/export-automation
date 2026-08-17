@@ -40,6 +40,7 @@ class GmailAuth:
         if not is_valid:
             raise ValueError(f"Gmail Authentication Failed: {msg}")
 
+        # Attempt 1: Connect via SMTP_SSL on port 465 (preferred)
         context = ssl.create_default_context()
         try:
             logger.info(f"Connecting to Gmail SMTP ({self.SMTP_HOST}:{self.SMTP_PORT_SSL}) for {self.email[:3]}***")
@@ -50,11 +51,30 @@ class GmailAuth:
         except smtplib.SMTPAuthenticationError as e:
             logger.error("Gmail SMTP authentication failed. Check your App Password in Google Account settings.")
             raise ConnectionError("Invalid Gmail App Password or Account credentials.") from e
-        except Exception as e:
-            logger.error(f"Failed to connect to Gmail SMTP: {e}")
-            raise ConnectionError(f"SMTP Connection Error: {e}") from e
+        except (OSError, smtplib.SMTPException) as e:
+            logger.warning(f"SMTP_SSL connection on port {self.SMTP_PORT_SSL} failed: {e}. Trying fallback...")
 
-    def test_connection(self) -> Tuple[bool, str]:
+        # Attempt 2: Fallback to STARTTLS on port 587
+        try:
+            logger.info(f"Fallback: Connecting to Gmail SMTP ({self.SMTP_HOST}:{self.SMTP_PORT_TLS}) with STARTTLS...")
+            server = smtplib.SMTP(self.SMTP_HOST, self.SMTP_PORT_TLS, timeout=15)
+            server.starttls(context=context)
+            server.login(self.email, self.app_password)
+            logger.info("Successfully authenticated with Gmail SMTP via STARTTLS fallback.")
+            return server
+        except smtplib.SMTPAuthenticationError as e:
+            logger.error("Gmail SMTP authentication failed. Check your App Password in Google Account settings.")
+            raise ConnectionError("Invalid Gmail App Password or Account credentials.") from e
+        except Exception as e:
+            error_message = (
+                f"SMTP Connection Error: All connection attempts failed. Last error: {e}. "
+                "Please check your internet connection, firewall settings, and ensure "
+                f"outbound access to {self.SMTP_HOST} on ports {self.SMTP_PORT_SSL} or {self.SMTP_PORT_TLS} is allowed."
+            )
+            logger.error(error_message)
+            raise ConnectionError(error_message) from e
+
+    def test_connection(self) -> Tuple[bool, str]:  # type: ignore
         """
         Test SMTP connectivity and credentials without sending an email.
         """
