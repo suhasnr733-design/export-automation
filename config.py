@@ -51,7 +51,7 @@ class Config:
     # Search & Discovery Settings
     SEARCH_KEYWORD: str = os.getenv("SEARCH_KEYWORD", "Singing Bowls").strip()
     SEARCH_DELAY: float = float(os.getenv("SEARCH_DELAY", "1.0"))
-    MAX_SEARCH_RESULTS: int = int(os.getenv("MAX_SEARCH_RESULTS", "15"))
+    MAX_SEARCH_RESULTS: int = int(os.getenv("MAX_SEARCH_RESULTS", "50"))
     MAX_WEBSITES_PER_RESULT: int = int(os.getenv("MAX_WEBSITES_PER_RESULT", "5"))
     TEST_DISCOVERY: bool = _str_to_bool(os.getenv("TEST_DISCOVERY", "false"), default=False)
     DEFAULT_USER_AGENT: str = os.getenv(

@@ -58,6 +58,26 @@ PRODUCT_SYNONYMS: Dict[str, List[str]] = {
         "chakra bowl",
         "healing bowl",
         "healing bowls",
+        "bowl",
+        "bowls",
+        "tibetan",
+        "handcrafted",
+        "instrument",
+        "sound",
+        "meditation",
+        "chakra",
+        "healing",
+        "wellness",
+        "yoga",
+        "spiritual",
+        "sound bath",
+        "sound healing",
+        "percussion",
+        "artisan bowl",
+        "handmade bowl",
+        "gong",
+        "bells",
+        "mindfulness",
     ],
     "yoga": [
         "yoga",
@@ -106,6 +126,28 @@ BUYER_INTENT_TERMS = [
     "inquiry",
     "trade",
     "commercial",
+    # Additional retail and business intent terms
+    "seller",
+    "vendor",
+    "business",
+    "company",
+    "boutique",
+    "marketplace",
+    "ecommerce",
+    "e-commerce",
+    "online shop",
+    "contact",
+    "email",
+    "phone",
+    "website",
+    "order",
+    "purchase",
+    "buy",
+    "price",
+    "shipping",
+    "delivery",
+    "payment",
+    "inventory",
 ]
 
 UNRELATED_NEGATIVE_TERMS: Dict[str, List[str]] = {
@@ -118,9 +160,8 @@ UNRELATED_NEGATIVE_TERMS: Dict[str, List[str]] = {
         "tingsha bells",
     ],
     "singing bowl": [
-        "pashmina shawl",
-        "cashmere scarf",
-        "knitted wool sweater",
+        # Singing bowls rarely conflict with other products
+        # Removed overly strict filtering to improve discovery
     ],
 }
 
@@ -261,8 +302,22 @@ def evaluate_result_relevance(
                     negative_hits.append(neg)
 
     if "singing bowl" in kw_lower or "singing bowls" in kw_lower:
-        if exact_phrase_present and not generic_singing_overlap:
-            product_rel = "HIGH" if len(matched_product_terms) >= 2 else "MEDIUM"
+        # For singing bowls, allow results with related wellness terms alongside exact phrase
+        # or results with high relevance even if generic overlap exists
+        wellness_terms = ["meditation", "yoga", "healing", "wellness", "spiritual", "chakra", "sound bath", "mindfulness"]
+        has_wellness_context = any(term in text_corpus for term in wellness_terms)
+        
+        if exact_phrase_present:
+            # Exact phrase present - ACCEPT even with generic singing terms if wellness context exists
+            if has_wellness_context or len(matched_product_terms) >= 2:
+                product_rel = "HIGH"
+            elif not generic_singing_overlap:
+                product_rel = "MEDIUM"
+            else:
+                product_rel = "MEDIUM" if has_wellness_context else "LOW"
+        elif has_wellness_context and len(matched_product_terms) >= 1:
+            # Wellness context + product terms (even without exact phrase)
+            product_rel = "MEDIUM"
         else:
             product_rel = "NONE"
     else:

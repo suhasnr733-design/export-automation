@@ -32,6 +32,27 @@ DEFAULT_INTENT_MODIFIERS = [
     "import",
     "wholesale inquiry",
     "B2B buyer",
+    # Singing Bowl specific modifiers
+    "retailer",
+    "seller",
+    "shop",
+    "store",
+    "wellness",
+    "healing",
+    "yoga studio",
+    "meditation center",
+    "wellness center",
+    "gift shop",
+    "handmade",
+    "artisan",
+    "craft business",
+    "boutique",
+    "health store",
+    "spiritual shop",
+    "online store",
+    "buy",
+    "order",
+    "purchase",
 ]
 
 
@@ -87,4 +108,48 @@ class SearchQueryBuilder:
             f'{kw_phrase} inurl:about-us',
             f'{kw_phrase} "wholesale inquiry"',
             f'{kw_phrase} "procurement manager"',
+            f'{kw_phrase} "health food store"',
+            f'{kw_phrase} "gift retailer"',
+            f'{kw_phrase} inurl:shop OR inurl:store OR inurl:buy',
         ]
+
+    def build_category_specific_queries(self, keyword: str) -> List[str]:
+        """
+        Generate product-category-specific search variations for deeper discovery.
+        Particularly optimized for items like singing bowls that need retail/wellness focus.
+        """
+        clean_kw = keyword.strip()
+        kw_phrase = f'"{clean_kw}"' if not clean_kw.startswith('"') else clean_kw
+
+        queries = []
+        kw_lower = clean_kw.lower()
+
+        # Standard patterns for any product
+        queries.extend([
+            f'{kw_phrase} buy online',
+            f'{kw_phrase} "contact us"',
+            f'{kw_phrase} "order now"',
+            f'{kw_phrase} price',
+            f'{kw_phrase} supplier',
+        ])
+
+        # Singing Bowl specific patterns
+        if 'singing bowl' in kw_lower or 'bowl' in kw_lower:
+            queries.extend([
+                f'{kw_phrase} wholesale',
+                f'{kw_phrase} distributor',
+                f'{kw_phrase} retailer',
+                f'{kw_phrase} "handmade"',
+                f'{kw_phrase} meditation',
+                f'{kw_phrase} yoga',
+                f'{kw_phrase} healing',
+                f'{kw_phrase} wellness',
+                f'{kw_phrase} spiritual',
+                f'{kw_phrase} "sound bath"',
+                f'{kw_phrase} musician',
+                f'{kw_phrase} instrument store',
+                f'{kw_phrase} gift',
+                f'{kw_phrase} artisan',
+            ])
+
+        return queries
