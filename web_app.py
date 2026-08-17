@@ -70,8 +70,37 @@ app.config["SESSION_COOKIE_DOMAIN"] = False
 # In-memory staging cache for CSV file uploads before explicit confirmation
 STAGED_UPLOADS: Dict[str, Dict[str, Any]] = {}
 
+
+def _reset_data_on_startup() -> None:
+    """Optionally clear stale CSV data at startup to begin a clean discovery run."""
+    if not Config.RESET_ON_STARTUP:
+        init_data_stores()
+        return
+
+    reset_targets = [
+        Config.BUYERS_CSV,
+        Config.BUSINESS_EMAILS_CSV,
+        Config.INDIVIDUAL_EMAILS_CSV,
+        Config.CLASSIFICATION_LOG_CSV,
+        Config.QUALIFICATION_LOG_CSV,
+        Config.LEAD_REVIEW_LOG_CSV,
+        Config.CAMPAIGN_LOG_CSV,
+        Config.SENT_LOG_CSV,
+        Config.DISCOVERY_PROVENANCE_FILE,
+    ]
+
+    for file_path in reset_targets:
+        try:
+            if file_path.exists():
+                file_path.unlink()
+        except OSError:
+            pass
+
+    init_data_stores()
+
+
 # Ensure datastores exist on application start
-init_data_stores()
+_reset_data_on_startup()
 
 
 def _mask_email(email_str: str) -> str:

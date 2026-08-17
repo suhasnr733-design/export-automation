@@ -34,6 +34,8 @@ services:
         value: "5"
       - key: TEST_DISCOVERY
         value: "false"
+      - key: RESET_ON_STARTUP
+        value: "true"
 
       # Outreach & Simulation Quotas
       - key: DAILY_SEND_LIMIT

@@ -86,6 +86,7 @@ class Config:
 
     # Safety Mode: TEST_MODE=true strictly disables real email sending
     TEST_MODE: bool = _str_to_bool(os.getenv("TEST_MODE", "true"), default=True)
+    RESET_ON_STARTUP: bool = _str_to_bool(os.getenv("RESET_ON_STARTUP", "false"), default=False)
 
     @classmethod
     def get_presentation_file_path(cls) -> Path:

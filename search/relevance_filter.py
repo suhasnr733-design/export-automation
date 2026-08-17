@@ -44,20 +44,20 @@ PRODUCT_SYNONYMS: Dict[str, List[str]] = {
     "singing bowl": [
         "singing bowl",
         "singing bowls",
+        "tibetan singing bowl",
+        "tibetan singing bowls",
+        "handcrafted singing bowl",
+        "handcrafted singing bowls",
         "sound bowl",
+        "sound bowls",
         "meditation bowl",
-        "tibetan bowl",
-        "gong",
-        "gongs",
-        "bell",
-        "bells",
-        "sound therapy",
-        "sound healing",
-        "meditation",
+        "meditation bowls",
         "brass bowl",
         "bronze bowl",
         "crystal bowl",
-        "chakra",
+        "chakra bowl",
+        "healing bowl",
+        "healing bowls",
     ],
     "yoga": [
         "yoga",
@@ -185,21 +185,43 @@ class RelevanceAudit:
 
 
 def get_product_terms_for_keyword(keyword: str) -> List[str]:
-    """Retrieve expanded product terms for a given search keyword."""
+    """Retrieve product terms, but keep Singing Bowls exact and product-specific."""
     kw_clean = keyword.lower().strip()
     terms = set()
 
-    # Split keyword into individual words
+    # Always include exact phrase and single-word tokens
+    terms.add(kw_clean)
     words = re.findall(r"[a-z0-9]+", kw_clean)
     terms.update(words)
-    terms.add(kw_clean)
 
-    # Check known categories
+    # For exact Singing Bowls searches, avoid broad generic singing terms
+    if "singing bowls" in kw_clean or "singing bowl" in kw_clean:
+        exact_terms = [
+            "singing bowl",
+            "singing bowls",
+            "tibetan singing bowl",
+            "tibetan singing bowls",
+            "handcrafted singing bowl",
+            "handcrafted singing bowls",
+            "sound bowl",
+            "sound bowls",
+            "meditation bowl",
+            "meditation bowls",
+            "brass bowl",
+            "bronze bowl",
+            "crystal bowl",
+            "healing bowl",
+            "healing bowls",
+        ]
+        terms.update(exact_terms)
+        return sorted(terms)
+
+    # Normal behavior for other categories
     for cat_key, synonym_list in PRODUCT_SYNONYMS.items():
         if cat_key in kw_clean or any(w in cat_key for w in words):
             terms.update(synonym_list)
 
-    return list(terms)
+    return sorted(terms)
 
 
 def evaluate_result_relevance(
@@ -226,8 +248,11 @@ def evaluate_result_relevance(
     target_terms = get_product_terms_for_keyword(keyword)
     matched_product_terms = [t for t in target_terms if t in text_corpus]
 
-    # Check negative terms (e.g. singing bowl domains when searching for pashmina)
-    kw_lower = keyword.lower()
+    # For Singing Bowls specifically, require exact product phrase match rather than generic singing/wellness words
+    kw_lower = keyword.lower().strip()
+    exact_phrase_present = "singing bowls" in text_corpus or "singing bowl" in text_corpus
+    generic_singing_overlap = any(term in text_corpus for term in ["singing", "karaoke", "song", "vocal", "sing lesson", "learn to sing"])
+
     negative_hits = []
     for cat_key, neg_list in UNRELATED_NEGATIVE_TERMS.items():
         if cat_key in kw_lower:
@@ -235,13 +260,18 @@ def evaluate_result_relevance(
                 if neg in text_corpus:
                     negative_hits.append(neg)
 
-    # Calculate product relevance tier
-    if any(keyword.lower() in text_corpus for _ in [1]) or len(matched_product_terms) >= 2:
-        product_rel = "HIGH"
-    elif len(matched_product_terms) >= 1:
-        product_rel = "MEDIUM"
+    if "singing bowl" in kw_lower or "singing bowls" in kw_lower:
+        if exact_phrase_present and not generic_singing_overlap:
+            product_rel = "HIGH" if len(matched_product_terms) >= 2 else "MEDIUM"
+        else:
+            product_rel = "NONE"
     else:
-        product_rel = "NONE"
+        if any(keyword.lower() in text_corpus for _ in [1]) or len(matched_product_terms) >= 2:
+            product_rel = "HIGH"
+        elif len(matched_product_terms) >= 1:
+            product_rel = "MEDIUM"
+        else:
+            product_rel = "NONE"
 
     # If domain contains negative terms and 0 strong product matches, downgrade to NONE
     if negative_hits and len(matched_product_terms) == 0:
