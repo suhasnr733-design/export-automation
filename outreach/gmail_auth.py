@@ -3,6 +3,7 @@ Gmail Authentication and SMTP Client Manager.
 Provides authenticated SMTP sessions for Gmail outreach while securing credentials.
 """
 
+import socket
 import smtplib
 import ssl
 from typing import Optional, Tuple, Union
@@ -74,11 +75,53 @@ class GmailAuth:
             logger.error(error_message)
             raise ConnectionError(error_message) from e
 
-    def test_connection(self) -> Tuple[bool, str]:  # type: ignore
+    def diagnose_network(self) -> Tuple[bool, str]:
+        """
+        Performs low-level network diagnostics to check for DNS and port connectivity.
+        This helps isolate firewall, DNS, or container networking issues.
+        """
+        logger.info(f"Running network diagnostics for {self.SMTP_HOST}...")
+        # 1. Check DNS Resolution
+        try:
+            ip_address = socket.gethostbyname(self.SMTP_HOST)
+            logger.info(f"DNS resolution successful: '{self.SMTP_HOST}' resolved to {ip_address}.")
+        except socket.gaierror as e:
+            msg = f"Network Diagnostic FAILED: DNS resolution for '{self.SMTP_HOST}' failed. The system cannot find the IP address for Google's mail server. Error: {e}"
+            logger.error(msg)
+            return False, msg
+
+        # 2. Check Port Connectivity
+        ports_to_check = {"SSL/TLS (465)": self.SMTP_PORT_SSL, "STARTTLS (587)": self.SMTP_PORT_TLS}
+        accessible_ports = []
+        for name, port in ports_to_check.items():
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(5)
+                if s.connect_ex((self.SMTP_HOST, port)) == 0:
+                    logger.info(f"Port check PASSED for port {port} ({name}).")
+                    accessible_ports.append(port)
+                else:
+                    logger.warning(f"Port check FAILED for port {port} ({name}). Connection timed out or was refused.")
+
+        if not accessible_ports:
+            msg = f"Network Diagnostic FAILED: Could not connect to '{self.SMTP_HOST}' on any standard email ports (465, 587). This is likely a firewall or network policy issue blocking outbound traffic."
+            logger.error(msg)
+            return False, msg
+
+        success_msg = f"Network Diagnostic PASSED. DNS resolution is working and connection to '{self.SMTP_HOST}' is possible on port(s): {', '.join(map(str, accessible_ports))}."
+        logger.info(success_msg)
+        return True, success_msg
+
+    def test_connection(self) -> Tuple[bool, str]:
         """
         Test SMTP connectivity and credentials without sending an email.
+        Includes a network diagnostic pre-check for clearer error reporting.
         """
         try:
+            # First, run a low-level network check for better error messages.
+            is_network_ok, network_msg = self.diagnose_network()
+            if not is_network_ok:
+                return False, network_msg
+
             server = self.connect()
             server.quit()
             return True, "Gmail SMTP credentials verified successfully."
