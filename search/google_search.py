@@ -97,6 +97,63 @@ class GoogleSearchAdapter:
         is_stub = self.test_discovery if self.test_discovery is not None else Config.TEST_DISCOVERY
         return "STUB" if is_stub else "LIVE"
 
+    def _unwrap_bing_url(self, bing_url: str) -> str:
+        """Decode base64 target URLs from Bing redirect links."""
+        if not bing_url:
+            return ""
+        if "bing.com/ck/a" in bing_url:
+            import base64
+            from urllib.parse import parse_qs
+            parsed = urlparse(bing_url)
+            qs = parse_qs(parsed.query)
+            if "u" in qs:
+                u_val = qs["u"][0]
+                if u_val.startswith("a1"):
+                    raw_b64 = u_val[2:]
+                    raw_b64 += "=" * ((4 - len(raw_b64) % 4) % 4)
+                    try:
+                        decoded = base64.urlsafe_b64decode(raw_b64).decode("utf-8", errors="ignore")
+                        return decoded
+                    except Exception:
+                        pass
+        return self._clean_search_url(bing_url)
+
+    def _fetch_bing_search(self, query: str, max_items: int = 5) -> List[Dict[str, Any]]:
+        """Fallback web search using public search engine when primary is blocked or empty."""
+        headers = {
+            "User-Agent": self.user_agent,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+        url = "https://www.bing.com/search"
+        try:
+            resp = requests.get(url, params={"q": query}, headers=headers, timeout=self.timeout)
+            if resp.status_code != 200:
+                return []
+            soup = BeautifulSoup(resp.text, "html.parser")
+            results = []
+            for li in soup.find_all("li", class_="b_algo"):
+                h2 = li.find("h2")
+                a = h2.find("a") if h2 else None
+                p = li.find("p") or li.find(class_="b_caption")
+                if a and a.get("href"):
+                    raw_url = self._unwrap_bing_url(a["href"])
+                    title = a.get_text().strip()
+                    snippet = p.get_text().strip() if p else ""
+                    if raw_url.startswith("http") and "bing.com" not in raw_url:
+                        results.append({
+                            "title": title,
+                            "url": raw_url,
+                            "snippet": snippet,
+                            "source_platform": self.PLATFORM_NAME,
+                            "query": query,
+                        })
+                        if len(results) >= max_items:
+                            break
+            return results
+        except Exception:
+            return []
+
     def _clean_search_url(self, raw_url: str) -> str:
         """Clean redirect links (e.g. DuckDuckGo / Google redirect wrappers) to direct URLs."""
         if not raw_url:
@@ -334,9 +391,13 @@ class GoogleSearchAdapter:
             return [], diag
 
     def _fetch_public_search(self, query: str, max_items: int = 5) -> List[Dict[str, Any]]:
-        """Fetch search items and record diagnostic metadata."""
+        """Fetch search items and record diagnostic metadata with multi-engine fallback."""
         results, diag = self.fetch_with_diagnostic(query, max_items=max_items)
         self.last_diagnostics.append(diag)
+        if not results:
+            fallback = self._fetch_bing_search(query, max_items=max_items)
+            if fallback:
+                return fallback
         return results
 
     def _get_synthetic_test_seeds(self, keyword: str) -> List[Dict[str, Any]]:

@@ -59,6 +59,27 @@ PRODUCT_SYNONYMS: Dict[str, List[str]] = {
         "crystal bowl",
         "chakra",
     ],
+    "yoga": [
+        "yoga",
+        "mat",
+        "mats",
+        "strap",
+        "straps",
+        "block",
+        "blocks",
+        "bolster",
+        "bolsters",
+        "meditation",
+        "cushion",
+        "cushions",
+        "wellness",
+        "fitness",
+        "accessories",
+        "pilates",
+        "activewear",
+        "props",
+        "equipment",
+    ],
 }
 
 # Commercial buyer and wholesale intent terms
@@ -197,8 +218,9 @@ def evaluate_result_relevance(
     company = str(item.get("company_name", "")).strip()
     country = str(item.get("country", "")).strip()
     email = str(item.get("email", "")).strip()
+    item_kw = str(item.get("keyword", "")).strip()
 
-    text_corpus = f"{title} {url} {snippet} {content} {company}".lower()
+    text_corpus = f"{title} {url} {snippet} {content} {company} {item_kw} {query}".lower()
 
     # 1. Product Relevance Analysis
     target_terms = get_product_terms_for_keyword(keyword)

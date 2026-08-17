@@ -41,7 +41,7 @@ class WebsiteSearchAdapter:
     def __init__(
         self,
         target_domains: Optional[List[str]] = None,
-        timeout: Any = (1.0, 2.0),
+        timeout: Any = 5.0,
         user_agent: Optional[str] = None,
         max_pages_per_site: int = 2,
         max_websites: Optional[int] = None,
@@ -66,72 +66,71 @@ class WebsiteSearchAdapter:
         parsed = urlparse(raw_url)
         return f"{parsed.scheme}://{parsed.netloc}"
 
-    def inspect_website(self, root_url: str) -> List[Dict[str, str]]:
+    def inspect_website(self, root_url: str, keyword: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Politely inspect key public pages of a website for buyer information.
-        Returns a list of extracted normalized buyer records.
+        Returns a list of extracted normalized buyer records with metadata.
         """
         base_url = self._get_base_url(root_url)
-        logger.info(f"[{self.PLATFORM_NAME}] Inspecting target website: {base_url}")
+        logger.info(f"[{self.PLATFORM_NAME}] Inspecting target website: {root_url}")
 
         headers = {
             "User-Agent": self.user_agent,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
         }
 
         visited_urls: Set[str] = set()
-        discovered_buyers: List[Dict[str, str]] = []
+        discovered_buyers: List[Dict[str, Any]] = []
         pages_checked = 0
 
-        # Quick liveness check on base URL
-        try:
-            resp = requests.get(base_url, headers=headers, timeout=self.timeout)
-            if resp.status_code == 200 and resp.text:
-                records = extract_buyers_from_website(
-                    html_content=resp.text,
-                    url=base_url,
-                    source_platform=self.PLATFORM_NAME,
-                )
-                email_records = [r for r in records if r.get("email")]
-                if email_records:
-                    return email_records
-                discovered_buyers.extend(records)
-                pages_checked += 1
-        except (requests.ConnectionError, requests.Timeout):
-            # If domain fails to connect, abort further subpaths for this domain
-            logger.debug(f"Host '{base_url}' unreachable. Skipping subpages.")
-            return []
-        except Exception as e:
-            logger.debug(f"Error checking root '{base_url}': {e}")
+        # Step 1: Inspect the EXACT target URL first
+        target_urls = [root_url]
+        # Step 2: Add candidate subpaths relative to base URL
+        for path in ["/contact", "/contact-us", "/about", "/about-us", "/wholesale"]:
+            cand = urljoin(base_url, path)
+            if cand.lower() not in [u.lower() for u in target_urls]:
+                target_urls.append(cand)
 
-        # Check secondary candidate paths (e.g. /contact, /wholesale)
-        for path in ["/contact", "/wholesale", "/about"]:
+        for u in target_urls:
             if pages_checked >= self.max_pages_per_site:
                 break
-
-            target_url = urljoin(base_url, path)
-            if target_url.lower() in visited_urls:
+            if u.lower() in visited_urls:
                 continue
-            visited_urls.add(target_url.lower())
+            visited_urls.add(u.lower())
 
             try:
-                resp = requests.get(target_url, headers=headers, timeout=self.timeout)
+                resp = requests.get(u, headers=headers, timeout=self.timeout)
                 pages_checked += 1
 
                 if resp.status_code == 200 and resp.text:
+                    soup = BeautifulSoup(resp.text, "html.parser")
+                    page_title = soup.title.string.strip() if (soup.title and soup.title.string) else ""
+                    text_content = soup.get_text(separator=" ")
+                    snippet = text_content[:400].strip()
+
                     records = extract_buyers_from_website(
                         html_content=resp.text,
-                        url=base_url,
+                        url=root_url,
+                        title=page_title,
                         source_platform=self.PLATFORM_NAME,
                     )
+                    for r in records:
+                        r["title"] = page_title or r.get("company_name", "")
+                        r["snippet"] = snippet
+                        r["content"] = text_content[:2000]
+                        if keyword:
+                            r["keyword"] = keyword
+
                     email_records = [r for r in records if r.get("email")]
                     if email_records:
                         discovered_buyers.extend(email_records)
                         break
-                    elif records:
+                    elif records and not discovered_buyers:
                         discovered_buyers.extend(records)
-
-            except requests.RequestException:
+            except (requests.ConnectionError, requests.Timeout):
+                if u == root_url and u == base_url:
+                    break
                 continue
             except Exception:
                 continue
@@ -149,7 +148,7 @@ class WebsiteSearchAdapter:
 
         results = []
         for u in urls:
-            records = self.inspect_website(u)
+            records = self.inspect_website(u, keyword=keyword)
             results.extend(records)
         return results
 

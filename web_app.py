@@ -361,15 +361,18 @@ def run_classification_action():
     """Execute AI classification pipeline on buyer dataset."""
     try:
         summary = run_classification_pipeline(
-            buyers_path=Config.BUYERS_CSV,
-            biz_path=Config.BUSINESS_EMAILS_CSV,
-            ind_path=Config.INDIVIDUAL_EMAILS_CSV,
-            log_path=Config.CLASSIFICATION_LOG_CSV,
+            buyers_csv_path=Config.BUYERS_CSV,
+            biz_csv_path=Config.BUSINESS_EMAILS_CSV,
+            ind_csv_path=Config.INDIVIDUAL_EMAILS_CSV,
+            log_csv_path=Config.CLASSIFICATION_LOG_CSV,
             force_test_mode=Config.TEST_MODE,
         )
+        total = summary.get("total_buyer_records", summary.get("total_records", 0))
+        biz = summary.get("business_contacts", summary.get("business_count", 0))
+        ind = summary.get("individual_contacts", summary.get("individual_count", 0))
         flash(
-            f"AI Classification Complete! Processed {summary['total_records']} contacts: "
-            f"{summary['business_count']} Business (B2B), {summary['individual_count']} Individual.",
+            f"AI Classification Complete! Processed {total} contacts: "
+            f"{biz} Business (B2B), {ind} Individual.",
             "success"
         )
     except Exception as e:

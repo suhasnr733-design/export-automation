@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "last_discovery_keyword": "Handmade Pashmina",
-    "last_discovery_timestamp": "2026-08-14T18:29:49+05:30",
-    "total_provenance_records": 13
+    "last_discovery_keyword": "Pashmina",
+    "last_discovery_timestamp": "2026-08-16T15:48:13.513077+00:00",
+    "total_provenance_records": 15
   },
   "records": {
     "import@zenithhealing.com": {
@@ -147,6 +147,28 @@
       "country": "",
       "relevance_decision": "ACCEPT",
       "relevance_reason": "relevant product (pashmina) and commercial buyer criteria"
+    },
+    "hlifestyleshop@gmail.com": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Handmade Pashmina",
+      "discovery_timestamp": "2026-08-16T02:40:39.604569+00:00",
+      "source_platform": "Website Search",
+      "url": "https://giftapashmina.com",
+      "company_name": "Gift A Pashmina",
+      "country": "",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Discovered via keyword-aware web search"
+    },
+    "hello@pashmina.com": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Pashmina",
+      "discovery_timestamp": "2026-08-16T15:48:13.513077+00:00",
+      "source_platform": "Website Search",
+      "url": "https://www.pashmina.com/",
+      "company_name": "Pashmina.com",
+      "country": "India",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Discovered via keyword-aware web search"
     }
   }
 }

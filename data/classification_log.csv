@@ -1,14 +1,14 @@
 email,category,confidence,reason,classification_source,review_required,timestamp
-import@zenithhealing.com,business,0.95,Corporate domain '@zenithhealing.com' with commercial prefix 'import' (Zenith Sound Healing Imports Ltd),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.601242+00:00
-contact@aurawellness.de,business,0.95,Corporate domain '@aurawellness.de' with commercial prefix 'contact' (Aura Wellness Wholesale),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.601242+00:00
-buyer.sophie@lotusliving.co.uk,business,0.95,Corporate domain '@lotusliving.co.uk' with commercial prefix 'buyer.sophie' (Lotus Living Global),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.611024+00:00
-info@holisticgoods.com,business,0.95,Corporate domain '@holisticgoods.com' with commercial prefix 'info' (Holistic Goods LLC),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.611024+00:00
-astrid.buyer@nordicsound.se,business,0.95,Corporate domain '@nordicsound.se' with commercial prefix 'astrid.buyer' (Nordic Sound & Soul),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.611024+00:00
-liam@celticwellbeing.ie,business,0.95,Corporate domain '@celticwellbeing.ie' (Celtic Wellbeing Distribution),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.613869+00:00
-klaus.s@alpensound.at,business,0.95,Corporate domain '@alpensound.at' (Alpen Sound & Spa Imports),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.614379+00:00
-purchasing@australiansound.com.au,business,0.95,Corporate domain '@australiansound.com.au' with commercial prefix 'purchasing' (Australasian Sound Supplies Pty),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.614379+00:00
-chloe.procurement@maplewellness.ca,business,0.95,Corporate domain '@maplewellness.ca' with commercial prefix 'chloe.procurement' (Maple Leaf Wellness Inc),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.614379+00:00
-wholesale@kyotozenharmonix.jp,business,0.95,Corporate domain '@kyotozenharmonix.jp' with commercial prefix 'wholesale' (Kyoto Zen Harmonix),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.614379+00:00
-compras@solylunadist.es,business,0.95,Corporate domain '@solylunadist.es' with commercial prefix 'compras' (Sol y Luna Distribuciones),LOCAL_TEST_CLASSIFICATION,False,2026-08-14T12:25:08.614379+00:00
-support@pashminaartisan.in,business,0.95,The contact uses a generic business email address (support@) associated with a company name and a dedicated domain website.,GEMINI,False,2026-08-14T15:15:06.256794+00:00
-support@pashminavogue.com,business,0.95,The contact uses a generic business email address (support@) associated with a trademarked company name and a dedicated domain website.,GEMINI,False,2026-08-14T15:15:06.256794+00:00
+import@zenithhealing.com,business,0.95,Corporate domain '@zenithhealing.com' with commercial prefix 'import' (Zenith Sound Healing Imports Ltd),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.631374+00:00
+contact@aurawellness.de,business,0.95,Corporate domain '@aurawellness.de' with commercial prefix 'contact' (Aura Wellness Wholesale),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.632373+00:00
+buyer.sophie@lotusliving.co.uk,business,0.95,Corporate domain '@lotusliving.co.uk' with commercial prefix 'buyer.sophie' (Lotus Living Global),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.632373+00:00
+info@holisticgoods.com,business,0.95,Corporate domain '@holisticgoods.com' with commercial prefix 'info' (Holistic Goods LLC),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.632373+00:00
+astrid.buyer@nordicsound.se,business,0.95,Corporate domain '@nordicsound.se' with commercial prefix 'astrid.buyer' (Nordic Sound & Soul),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.633373+00:00
+liam@celticwellbeing.ie,business,0.95,Corporate domain '@celticwellbeing.ie' (Celtic Wellbeing Distribution),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.633373+00:00
+klaus.s@alpensound.at,business,0.95,Corporate domain '@alpensound.at' (Alpen Sound & Spa Imports),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.633373+00:00
+purchasing@australiansound.com.au,business,0.95,Corporate domain '@australiansound.com.au' with commercial prefix 'purchasing' (Australasian Sound Supplies Pty),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.634374+00:00
+chloe.procurement@maplewellness.ca,business,0.95,Corporate domain '@maplewellness.ca' with commercial prefix 'chloe.procurement' (Maple Leaf Wellness Inc),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.634374+00:00
+wholesale@kyotozenharmonix.jp,business,0.95,Corporate domain '@kyotozenharmonix.jp' with commercial prefix 'wholesale' (Kyoto Zen Harmonix),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.634374+00:00
+compras@solylunadist.es,business,0.95,Corporate domain '@solylunadist.es' with commercial prefix 'compras' (Sol y Luna Distribuciones),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.635373+00:00
+support@pashminaartisan.in,business,0.95,Corporate domain '@pashminaartisan.in' with commercial prefix 'support' (Pashmina Artisan),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.635373+00:00
+support@pashminavogue.com,business,0.95,Corporate domain '@pashminavogue.com' with commercial prefix 'support' (Pashmina Vogue™),LOCAL_TEST_CLASSIFICATION,False,2026-08-16T15:45:02.635373+00:00
