@@ -118,7 +118,7 @@ class GoogleSearchAdapter:
                         pass
         return self._clean_search_url(bing_url)
 
-    def _fetch_bing_search(self, query: str, max_items: int = 5) -> List[Dict[str, Any]]:
+    def _fetch_bing_search(self, query: str, max_items: int = 10) -> List[Dict[str, Any]]:
         """Fallback web search using public search engine when primary is blocked or empty."""
         headers = {
             "User-Agent": self.user_agent,
@@ -168,7 +168,7 @@ class GoogleSearchAdapter:
                 return unquote(match.group(1))
         return raw_url.strip()
 
-    def fetch_with_diagnostic(self, query: str, max_items: int = 5) -> Tuple[List[Dict[str, Any]], SearchDiagnostic]:
+    def fetch_with_diagnostic(self, query: str, max_items: int = 10) -> Tuple[List[Dict[str, Any]], SearchDiagnostic]:
         """
         Execute search query with explicit error classification and diagnostic tracking.
         Distinguishes:
@@ -254,15 +254,18 @@ class GoogleSearchAdapter:
                 )
                 return [], diag
 
-        # 2. Public Web Search via HTML Endpoint with standard browser headers
+        # 2. Public Web Search via HTML Endpoint with enhanced browser headers
         headers = {
             "User-Agent": self.user_agent,
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
+            "Cache-Control": "max-age=0",
+            "Upgrade-Insecure-Requests": "1",
         }
         data = {"q": query, "b": ""}
 
@@ -390,14 +393,20 @@ class GoogleSearchAdapter:
             )
             return [], diag
 
-    def _fetch_public_search(self, query: str, max_items: int = 5) -> List[Dict[str, Any]]:
-        """Fetch search items and record diagnostic metadata with multi-engine fallback."""
+    def _fetch_public_search(self, query: str, max_items: int = 10) -> List[Dict[str, Any]]:
+        """Fetch search items with intelligent engine fallback: DuckDuckGo → Bing on block/timeout."""
         results, diag = self.fetch_with_diagnostic(query, max_items=max_items)
         self.last_diagnostics.append(diag)
-        if not results:
+        
+        # If DuckDuckGo failed (blocked, empty, or timeout), automatically try Bing
+        if not results or diag.status in ("SEARCH_BLOCKED", "SEARCH_TIMEOUT"):
+            logger.info(f"[{self.PLATFORM_NAME}] DuckDuckGo failed ({diag.status}), falling back to Bing Search")
             fallback = self._fetch_bing_search(query, max_items=max_items)
             if fallback:
+                logger.info(f"[{self.PLATFORM_NAME}] Bing fallback successful, retrieved {len(fallback)} results")
                 return fallback
+            else:
+                logger.info(f"[{self.PLATFORM_NAME}] Bing fallback also returned no results")
         return results
 
     def _get_synthetic_test_seeds(self, keyword: str) -> List[Dict[str, Any]]:
@@ -502,12 +511,15 @@ class GoogleSearchAdapter:
                 logger.info(f"[{self.PLATFORM_NAME}] Query: '{q}'")
 
                 # Check keyword-isolated cache (bypass if force_refresh=True)
-                cached_items = self.cache.get(keyword, q, self.PLATFORM_NAME) if not force_refresh else None
+                # Use 5-minute cache expiry for live discovery (300 seconds)
+                cached_items = self.cache.get(keyword, q, self.PLATFORM_NAME, max_age_seconds=300) if not force_refresh else None
                 if cached_items is not None:
                     items = cached_items
+                    logger.info(f"[{self.PLATFORM_NAME}] Results retrieved from cache (5-min expiry)")
                 else:
-                    items = self._fetch_public_search(q, max_items=5)
+                    items = self._fetch_public_search(q, max_items=10)
                     self.cache.set(keyword, q, self.PLATFORM_NAME, items)
+                    logger.info(f"[{self.PLATFORM_NAME}] Fresh results fetched and cached")
 
                 for item in items:
                     u = item["url"].lower()

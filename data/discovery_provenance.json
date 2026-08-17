@@ -1,172 +1,62 @@
 {
   "metadata": {
-    "last_discovery_keyword": "Pashmina",
-    "last_discovery_timestamp": "2026-08-16T15:48:13.513077+00:00",
-    "total_provenance_records": 15
+    "last_discovery_keyword": "Singing Bowls",
+    "last_discovery_timestamp": "2026-08-17T05:30:48.141716+00:00",
+    "total_provenance_records": 5
   },
   "records": {
-    "import@zenithhealing.com": {
-      "data_source": "HISTORICAL_TEST",
+    "export@singingbowlsspecialist.com": {
+      "data_source": "LIVE_DISCOVERY",
       "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "Google Search",
-      "url": "https://www.zenithhealing.com",
-      "company_name": "Zenith Sound Healing Imports Ltd",
+      "discovery_timestamp": "2026-08-17T03:44:49.613545+00:00",
+      "source_platform": "Website Search",
+      "url": "https://www.singingbowlusa.com/",
+      "company_name": "Singingbowlusa",
       "country": "United States",
       "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
+      "relevance_reason": "Discovered via keyword-aware web search"
     },
-    "contact@aurawellness.de": {
-      "data_source": "HISTORICAL_TEST",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "Google Search",
-      "url": "https://www.aurawellness.de",
-      "company_name": "Aura Wellness Wholesale",
-      "country": "Germany",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
-    },
-    "buyer.sophie@lotusliving.co.uk": {
-      "data_source": "HISTORICAL_TEST",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "Google Search",
-      "url": "https://www.lotusliving.co.uk",
-      "company_name": "Lotus Living Global",
-      "country": "United Kingdom",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
-    },
-    "info@holisticgoods.com": {
-      "data_source": "HISTORICAL_TEST",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "Facebook",
-      "url": "https://www.facebook.com/holisticgoodswholesale",
-      "company_name": "Holistic Goods LLC",
-      "country": "United States",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
-    },
-    "astrid.buyer@nordicsound.se": {
-      "data_source": "HISTORICAL_TEST",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "Facebook",
-      "url": "https://www.nordicsound.se",
-      "company_name": "Nordic Sound & Soul",
-      "country": "Sweden",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
-    },
-    "liam@celticwellbeing.ie": {
-      "data_source": "HISTORICAL_TEST",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "LinkedIn",
-      "url": "https://www.celticwellbeing.ie",
-      "company_name": "Celtic Wellbeing Distribution",
-      "country": "Ireland",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
-    },
-    "klaus.s@alpensound.at": {
-      "data_source": "HISTORICAL_TEST",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "LinkedIn",
-      "url": "https://www.alpensound.at",
-      "company_name": "Alpen Sound & Spa Imports",
-      "country": "Austria",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
-    },
-    "purchasing@australiansound.com.au": {
-      "data_source": "HISTORICAL_TEST",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "Trade Directory",
-      "url": "https://www.australiansound.com.au",
-      "company_name": "Australasian Sound Supplies Pty",
-      "country": "Australia",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
-    },
-    "chloe.procurement@maplewellness.ca": {
-      "data_source": "HISTORICAL_TEST",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "Trade Directory",
-      "url": "https://www.maplewellness.ca",
-      "company_name": "Maple Leaf Wellness Inc",
-      "country": "Canada",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
-    },
-    "wholesale@kyotozenharmonix.jp": {
-      "data_source": "HISTORICAL_TEST",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "Website Search",
-      "url": "https://www.kyotozenharmonix.jp",
-      "company_name": "Kyoto Zen Harmonix",
-      "country": "Japan",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
-    },
-    "compras@solylunadist.es": {
-      "data_source": "HISTORICAL_TEST",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-14T11:00:00Z",
-      "source_platform": "Website Search",
-      "url": "https://www.solylunadist.es",
-      "company_name": "Sol y Luna Distribuciones",
-      "country": "Spain",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Baseline historical fixture for Singing Bowls"
-    },
-    "support@pashminaartisan.in": {
+    "contact@singmeter.com": {
       "data_source": "LIVE_DISCOVERY",
-      "keyword": "Handmade Pashmina",
-      "discovery_timestamp": "2026-08-14T18:29:49+05:30",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-17T05:04:21.139746+00:00",
       "source_platform": "Website Search",
-      "url": "https://pashminaartisan.in",
-      "company_name": "Pashmina Artisan",
-      "country": "India",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "relevant product (pashmina, artisan) and commercial buyer criteria"
-    },
-    "support@pashminavogue.com": {
-      "data_source": "LIVE_DISCOVERY",
-      "keyword": "Handmade Pashmina",
-      "discovery_timestamp": "2026-08-14T18:29:49+05:30",
-      "source_platform": "Website Search",
-      "url": "https://pashminavogue.com",
-      "company_name": "Pashmina Vogue™",
-      "country": "",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "relevant product (pashmina) and commercial buyer criteria"
-    },
-    "hlifestyleshop@gmail.com": {
-      "data_source": "LIVE_DISCOVERY",
-      "keyword": "Handmade Pashmina",
-      "discovery_timestamp": "2026-08-16T02:40:39.604569+00:00",
-      "source_platform": "Website Search",
-      "url": "https://giftapashmina.com",
-      "company_name": "Gift A Pashmina",
+      "url": "https://www.singmeter.com/",
+      "company_name": "Contact SingMeter",
       "country": "",
       "relevance_decision": "ACCEPT",
       "relevance_reason": "Discovered via keyword-aware web search"
     },
-    "hello@pashmina.com": {
+    "support@singmeter.com": {
       "data_source": "LIVE_DISCOVERY",
-      "keyword": "Pashmina",
-      "discovery_timestamp": "2026-08-16T15:48:13.513077+00:00",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-17T05:04:21.139746+00:00",
       "source_platform": "Website Search",
-      "url": "https://www.pashmina.com/",
-      "company_name": "Pashmina.com",
-      "country": "India",
+      "url": "https://www.singmeter.com/",
+      "company_name": "Contact SingMeter",
+      "country": "",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Discovered via keyword-aware web search"
+    },
+    "info@singarena.com": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-17T05:04:21.139746+00:00",
+      "source_platform": "Website Search",
+      "url": "https://singarena.com/",
+      "company_name": "SingArena",
+      "country": "United States",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Discovered via keyword-aware web search"
+    },
+    "atendimento@minhaconexao.com.br": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-17T05:30:48.141716+00:00",
+      "source_platform": "Website Search",
+      "url": "https://www.minhaconexao.com.br/",
+      "company_name": "Minha Conexão",
+      "country": "",
       "relevance_decision": "ACCEPT",
       "relevance_reason": "Discovered via keyword-aware web search"
     }

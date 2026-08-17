@@ -20,6 +20,15 @@ DEFAULT_INTENT_MODIFIERS = [
     '"contact"',
     '"email"',
     '"import"',
+    "bulk buyer",
+    "trade buyer",
+    "export distributor",
+    "international buyer",
+    "B2B procurement",
+    "business buyer",
+    "corporate buyer",
+    "commercial import",
+    "wholesale inquiry",
 ]
 
 

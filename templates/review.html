@@ -73,6 +73,14 @@
     </span>
   </div>
 
+  <!-- Cache Behavior Info Box -->
+  <div class="alert-box" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 16px; display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--text-secondary);">
+    <span style="font-size:1.1rem;">💡</span>
+    <div>
+      <strong style="color: #3b82f6;">Fresh Search by Default:</strong> Results are cached for 5 minutes. The "Fresh Search" option is <strong>enabled by default</strong> to fetch the latest results. Uncheck it only if you want cached results.
+    </div>
+  </div>
+
   <form action="{{ url_for('run_discovery_action') }}" method="POST" style="display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap;">
     <div style="flex:2; min-width:240px;">
       <label for="keyword" style="display:block; font-size:0.85rem; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">
@@ -108,9 +116,9 @@
     </div>
 
     <div style="display:flex; align-items:center; gap:8px; padding-bottom:8px; min-width:140px;">
-      <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-secondary); cursor:pointer;">
-        <input type="checkbox" name="force_refresh" value="true">
-        <span>Force Fresh Search</span>
+      <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-secondary); cursor:pointer; font-weight:600;">
+        <input type="checkbox" name="force_refresh" value="true" checked>
+        <span style="color:var(--accent-warning);">🔄 Fresh Search</span>
       </label>
     </div>
 
