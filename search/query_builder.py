@@ -5,30 +5,33 @@ Generates configurable, multi-intent search query combinations to discover expor
 
 from typing import List, Optional
 
-# Standard commercial intent modifiers for B2B export discovery
+# Commercial-intent modifiers tuned for the exact product keyword "Singing Bowls"
 DEFAULT_INTENT_MODIFIERS = [
-    "importer",
-    "distributor",
-    "wholesaler",
-    "wholesale",
-    "retailer",
     "supplier",
-    "buyer",
-    "direct import",
-    "procurement",
-    "wholesale catalog",
-    '"contact"',
-    '"email"',
-    '"import"',
+    "importer",
+    "wholesaler",
+    "distributor",
+    "manufacturer",
+    "exporter",
+    "wholesale",
+    "B2B",
+    "business buyer",
     "bulk buyer",
     "trade buyer",
-    "export distributor",
+    "procurement",
+    "direct supplier",
+    "retail supplier",
+    "wholesale catalog",
+    "contact",
+    "inquiry",
+    "dealer",
+    "buying agent",
     "international buyer",
-    "B2B procurement",
-    "business buyer",
-    "corporate buyer",
-    "commercial import",
+    "commercial buyer",
+    "trade supplier",
+    "import",
     "wholesale inquiry",
+    "B2B buyer",
 ]
 
 
