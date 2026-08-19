@@ -165,6 +165,62 @@ UNRELATED_NEGATIVE_TERMS: Dict[str, List[str]] = {
     ],
 }
 
+# Domains that are always irrelevant for B2B export discovery
+BLOCKED_DOMAINS = [
+    "whatsapp.com",
+    "web.whatsapp.com",
+    "zhihu.com",
+    "baidu.com",
+    "zhidao.baidu.com",
+    "jingyan.baidu.com",
+    "mail.qq.com",
+    "service.mail.qq.com",
+    "qq.com",
+    "sciencedirect.com",
+    "researchgate.net",
+    "semanticscholar.org",
+    "structurae.net",
+    "scispace.com",
+    "scite.ai",
+    "upcommons.upc.edu",
+    "jglobal.jst.go.jp",
+    "doc88.com",
+    "jobsnet.in",
+    "sfit.ac.in",
+    "juit.ac.in",
+    "offcampusjobs4u.com",
+    "freshershunt.in",
+    "scribd.com",
+    "uptti.ac.in",
+    "tsec.edu",
+    "care.ac.in",
+    "punchng.com",
+    "berliner-zeitung.de",
+    "facebook.com",
+    "linkedin.com",
+    "twitter.com",
+    "youtube.com",
+    "instagram.com",
+    "reddit.com",
+    "wikipedia.org",
+    "stackoverflow.com",
+    "github.com",
+    # Grammar / Dictionary / Unrelated domains
+    "merriam-webster.com",
+    "grammarly.com",
+    "dictionary.com",
+    "cambridge.org",
+    "collinsdictionary.com",
+    "grammarwaves.com",
+    "amerilingua.com",
+    "ingles.com",
+    "englishcurrent.com",
+    "vocaberry.com",
+    "speedtest.net",
+    "ookla.com",
+    "commercialguru.com.sg",
+]
+
 
 class RelevanceAudit:
     """Structure storing evaluation decision and diagnostic metadata."""
@@ -226,16 +282,20 @@ class RelevanceAudit:
 
 
 def get_product_terms_for_keyword(keyword: str) -> List[str]:
-    """Retrieve product terms, but keep Singing Bowls exact and product-specific."""
+    """Retrieve product terms for relevance matching.
+    
+    IMPORTANT: For multi-word keywords like 'Singing Bowls', we do NOT add individual
+    word tokens (e.g. 'singing', 'bowls') to avoid false-positive matches on completely
+    unrelated pages that happen to contain common words like 'bowl' or 'singing'.
+    Only multi-word phrases and product-specific synonyms are used.
+    """
     kw_clean = keyword.lower().strip()
     terms = set()
 
-    # Always include exact phrase and single-word tokens
+    # Always include exact full phrase
     terms.add(kw_clean)
-    words = re.findall(r"[a-z0-9]+", kw_clean)
-    terms.update(words)
 
-    # For exact Singing Bowls searches, avoid broad generic singing terms
+    # For exact Singing Bowls searches, use ONLY multi-word phrases — never single words
     if "singing bowls" in kw_clean or "singing bowl" in kw_clean:
         exact_terms = [
             "singing bowl",
@@ -253,11 +313,18 @@ def get_product_terms_for_keyword(keyword: str) -> List[str]:
             "crystal bowl",
             "healing bowl",
             "healing bowls",
+            "tibetan bowl",
+            "sound healing",
+            "sound bath",
         ]
         terms.update(exact_terms)
         return sorted(terms)
 
-    # Normal behavior for other categories
+    # For single-word keywords, add individual tokens
+    words = re.findall(r"[a-z0-9]+", kw_clean)
+    terms.update(words)
+
+    # Normal synonym expansion for other categories
     for cat_key, synonym_list in PRODUCT_SYNONYMS.items():
         if cat_key in kw_clean or any(w in cat_key for w in words):
             terms.update(synonym_list)
@@ -283,7 +350,26 @@ def evaluate_result_relevance(
     email = str(item.get("email", "")).strip()
     item_kw = str(item.get("keyword", "")).strip()
 
-    text_corpus = f"{title} {url} {snippet} {content} {company} {item_kw} {query}".lower()
+    # NOTE: Do NOT include {query} in text_corpus — it causes false positives
+    # where every result matches product terms because the query itself contains the keyword.
+    text_corpus = f"{title} {url} {snippet} {content} {company} {item_kw}".lower()
+
+    # Check if the URL belongs to a known irrelevant domain and reject immediately
+    url_lower = url.lower()
+    for blocked in BLOCKED_DOMAINS:
+        if blocked in url_lower:
+            return RelevanceAudit(
+                query=query,
+                title=title,
+                url=url,
+                product_relevance="NONE",
+                buyer_relevance="LOW",
+                decision="REJECT",
+                reason=f"blocked domain: {blocked} (irrelevant for B2B export discovery)",
+                company=company,
+                country=country,
+                extracted_email=email,
+            )
 
     # 1. Product Relevance Analysis
     target_terms = get_product_terms_for_keyword(keyword)

@@ -1,75 +1,70 @@
 {% extends "base.html" %}
 
-{% block title %}Buyer Contacts{% endblock %}
+{% block title %}Buyer Dataset Directory{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:24px;">
   <div>
-    <h1 class="page-title">Discovered Buyer Dataset</h1>
-    <p class="page-subtitle">Verified international importer profiles, trade contacts, and buying desk metadata.</p>
+    <h1 class="page-title">Buyer Contacts Directory</h1>
+    <p class="page-subtitle">Master database of discovered international importers, distributors, and verified trade contacts.</p>
   </div>
-  <div style="display: flex; gap: 10px;">
-    <a href="{{ url_for('upload_buyers') }}" class="btn btn-secondary">📤 Upload CSV</a>
-    <a href="{{ url_for('review_view') }}" class="btn btn-secondary" style="border-color:#8b5cf6; color:#c4b5fd;">🛡️ Review Live Leads</a>
-    <a href="{{ url_for('classify_view') }}" class="btn btn-primary">🤖 Classify Audience</a>
+  <div style="display:flex; gap:10px;">
+    <a href="{{ url_for('upload_buyers') }}" class="btn btn-secondary">📤 Import CSV</a>
+    <a href="{{ url_for('review_view') }}" class="btn btn-primary">🛡️ Lead Review Desk</a>
   </div>
 </div>
 
-<div class="card">
-  <div class="card-header">
+<div class="card" style="padding:0; overflow:hidden;">
+  <div class="card-header" style="padding:18px 24px; margin-bottom:0; background:rgba(15, 23, 42, 0.6);">
     <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; width:100%;">
       <div style="flex:1; min-width:240px;">
-        <input type="text" id="tableSearch" class="form-control" placeholder="🔍 Search buyers by name, company, email, or country...">
+        <input type="text" id="tableSearch" class="form-control" placeholder="🔍 Filter buyers by company, contact, or country...">
       </div>
-      <div style="display:flex; gap:10px;">
-        <select id="categoryFilter" class="form-control" style="width:auto;">
-          <option value="all">All Categories</option>
-          <option value="business">Business (B2B)</option>
-          <option value="individual">Individual</option>
-        </select>
-      </div>
+      <span class="badge badge-primary">{{ buyers|length }} Verified Records</span>
     </div>
   </div>
 
-  <div class="table-responsive">
-    <table class="data-table">
+  <div class="table-container" style="border:none; border-radius:0;">
+    <table class="table">
       <thead>
         <tr>
           <th>#</th>
-          <th>Buyer Name</th>
           <th>Company / Entity</th>
+          <th>Contact Person</th>
           <th>Email Address</th>
           <th>Country</th>
           <th>Category</th>
           <th>Confidence</th>
           <th>Source</th>
-          <th>Website</th>
+          <th style="text-align:right;">Website</th>
         </tr>
       </thead>
       <tbody>
         {% for b in buyers %}
         <tr data-category="{{ b.category }}">
           <td style="color:var(--text-muted);">{{ loop.index }}</td>
-          <td><strong>{{ b.buyer_name or '—' }}</strong></td>
-          <td>{{ b.company_name or '—' }}</td>
-          <td style="font-family:var(--font-mono); color:var(--text-primary);">{{ b.email }}</td>
-          <td>{{ b.country or '—' }}</td>
+          <td style="font-weight:700; color:var(--text-main);">{{ b.company_name or '—' }}</td>
+          <td>{{ b.buyer_name or '—' }}</td>
+          <td>
+            <code style="background:var(--bg-app); padding:2px 8px; border-radius:var(--radius-xs); color:#93c5fd; font-size:0.85rem;">{{ b.email }}</code>
+          </td>
+          <td>🌍 {{ b.country or '—' }}</td>
           <td>
             {% if b.category == 'business' %}
-              <span class="badge badge-success"><span class="badge-dot"></span> B2B</span>
+              <span class="badge badge-success">B2B DESK</span>
             {% elif b.category == 'individual' %}
-              <span class="badge badge-info"><span class="badge-dot"></span> INDIVIDUAL</span>
+              <span class="badge badge-info">INDIVIDUAL</span>
             {% else %}
               <span class="badge badge-secondary">UNCLASSIFIED</span>
             {% endif %}
           </td>
           <td>
-            <span style="font-family:var(--font-mono); font-size:0.8rem;">{{ (b.confidence * 100)|round }}%</span>
+            <span style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700;">{{ (b.confidence * 100)|round|int }}%</span>
           </td>
-          <td><span class="badge badge-secondary">{{ b.source_platform }}</span></td>
-          <td>
+          <td><span class="badge badge-primary">{{ b.source_platform }}</span></td>
+          <td style="text-align:right;">
             {% if b.website %}
-              <a href="{{ b.website }}" target="_blank" rel="noopener noreferrer" style="font-size:0.8rem;">Visit ↗</a>
+              <a href="{{ b.website }}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-cyan); font-weight:600;">Visit ↗</a>
             {% else %}
               <span style="color:var(--text-muted);">—</span>
             {% endif %}
@@ -78,7 +73,7 @@
         {% else %}
         <tr>
           <td colspan="9" style="text-align:center; padding:3rem; color:var(--text-muted);">
-            No buyer records currently in <code>data/buyers.csv</code>. Use <a href="{{ url_for('upload_buyers') }}">Upload CSV</a> or discovery CLI.
+            No buyer records currently stored in <code>data/buyers.csv</code>. Use <a href="{{ url_for('review_view') }}">Live Discovery</a> or <a href="{{ url_for('upload_buyers') }}">Upload CSV</a>.
           </td>
         </tr>
         {% endfor %}

@@ -118,16 +118,36 @@ class GoogleSearchAdapter:
                         pass
         return self._clean_search_url(bing_url)
 
+    @staticmethod
+    def _has_non_latin_chars(text: str) -> bool:
+        """Detect if text contains Chinese, Japanese, Korean, Arabic, Cyrillic or other non-Latin characters."""
+        import unicodedata
+        for ch in text:
+            cat = unicodedata.category(ch)
+            cp = ord(ch)
+            # CJK Unified Ideographs, Hiragana, Katakana, Arabic, Cyrillic, Thai, etc.
+            if (0x4E00 <= cp <= 0x9FFF) or \
+               (0x3040 <= cp <= 0x30FF) or \
+               (0x0600 <= cp <= 0x06FF) or \
+               (0x0400 <= cp <= 0x04FF) or \
+               (0x0E00 <= cp <= 0x0E7F) or \
+               (0xAC00 <= cp <= 0xD7AF):
+                return True
+        return False
+
     def _fetch_bing_search(self, query: str, max_items: int = 10) -> List[Dict[str, Any]]:
-        """Fallback web search using public search engine when primary is blocked or empty."""
+        """Fallback web search using Bing with English-only result filtering."""
         headers = {
             "User-Agent": self.user_agent,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
         }
         url = "https://www.bing.com/search"
+        # Use simple params — locale forcing breaks Bing HTML structure
+        params = {"q": query, "count": str(max_items * 2)}
         try:
-            resp = requests.get(url, params={"q": query}, headers=headers, timeout=self.timeout)
+            resp = requests.get(url, params=params, headers=headers, timeout=self.timeout)
             if resp.status_code != 200:
                 return []
             soup = BeautifulSoup(resp.text, "html.parser")
@@ -140,6 +160,19 @@ class GoogleSearchAdapter:
                     raw_url = self._unwrap_bing_url(a["href"])
                     title = a.get_text().strip()
                     snippet = p.get_text().strip() if p else ""
+
+                    # Skip results with non-Latin (Chinese/Japanese/Arabic/etc.) titles
+                    if self._has_non_latin_chars(title):
+                        logger.info(f"[{self.PLATFORM_NAME}] Skipping non-English result: {title[:40]}")
+                        continue
+
+                    # Skip obviously non-English domain TLDs when title looks foreign
+                    parsed_domain = urlparse(raw_url).netloc.lower()
+                    skip_tlds = [".cn", ".baidu.com", ".zhihu.com", ".qq.com", ".weibo.com", ".taobao.com"]
+                    if any(tld in parsed_domain for tld in skip_tlds):
+                        logger.info(f"[{self.PLATFORM_NAME}] Skipping non-English domain: {parsed_domain}")
+                        continue
+
                     if raw_url.startswith("http") and "bing.com" not in raw_url:
                         results.append({
                             "title": title,
@@ -153,6 +186,7 @@ class GoogleSearchAdapter:
             return results
         except Exception:
             return []
+
 
     def _clean_search_url(self, raw_url: str) -> str:
         """Clean redirect links (e.g. DuckDuckGo / Google redirect wrappers) to direct URLs."""
@@ -254,51 +288,19 @@ class GoogleSearchAdapter:
                 )
                 return [], diag
 
-        # 2. Public Web Search via HTML Endpoint with enhanced browser headers
+        # 2. Public Web Search via DDG Lite Endpoint (Highly reliable & fast)
+        endpoint_url = "https://lite.duckduckgo.com/lite/"
         headers = {
             "User-Agent": self.user_agent,
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-            "Sec-Fetch-User": "?1",
-            "Cache-Control": "max-age=0",
-            "Upgrade-Insecure-Requests": "1",
         }
-        data = {"q": query, "b": ""}
+        data = {"q": query}
 
         try:
             resp = requests.post(endpoint_url, data=data, headers=headers, timeout=self.timeout)
             resp_length = len(resp.content)
             http_code = resp.status_code
-
-            # Check for bot block or rate limiting
-            if http_code in (403, 429):
-                diag = SearchDiagnostic(
-                    query=query,
-                    status="SEARCH_BLOCKED",
-                    http_status=http_code,
-                    response_received=True,
-                    response_length=resp_length,
-                    failure_type=f"Rate limited or forbidden by search engine (HTTP {http_code})",
-                    endpoint=endpoint_url,
-                )
-                return [], diag
-
-            if http_code == 202:
-                # 202 Accepted without search results indicates anti-bot challenge
-                diag = SearchDiagnostic(
-                    query=query,
-                    status="SEARCH_BLOCKED",
-                    http_status=202,
-                    response_received=True,
-                    response_length=resp_length,
-                    failure_type="Anti-bot challenge or CAPTCHA required (HTTP 202 Accepted)",
-                    endpoint=endpoint_url,
-                )
-                return [], diag
 
             if http_code != 200:
                 diag = SearchDiagnostic(
@@ -315,33 +317,48 @@ class GoogleSearchAdapter:
             # Parse HTML content
             try:
                 soup = BeautifulSoup(resp.text, "html.parser")
-                result_elements = soup.find_all("div", class_=re.compile(r"result\s|results_links"))
-                if not result_elements:
-                    result_elements = soup.find_all("div", class_="result")
+                # DDG Lite uses a.result-link and td.result-snippet
+                links = soup.find_all("a", class_="result-link")
+                snippets = soup.find_all("td", class_="result-snippet")
 
-                for res_elem in result_elements:
-                    title_elem = (
-                        res_elem.find("a", class_="result__url")
-                        or res_elem.find("a", class_="result__a")
-                        or res_elem.find("a", class_=re.compile(r"result__snippet|result__url|result__a"))
-                        or res_elem.find("a")
-                    )
-                    snippet_elem = res_elem.find("a", class_="result__snippet") or res_elem.find(class_=re.compile(r"snippet"))
+                for i, a_tag in enumerate(links):
+                    link = self._clean_search_url(a_tag.get("href", ""))
+                    title = a_tag.get_text().strip()
+                    snippet = snippets[i].get_text().strip() if i < len(snippets) else ""
 
-                    if title_elem and title_elem.get("href"):
-                        link = self._clean_search_url(title_elem["href"])
-                        title = title_elem.get_text().strip()
-                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
+                    if link.startswith("http") and "duckduckgo.com" not in link:
+                        results.append({
+                            "title": title,
+                            "url": link,
+                            "snippet": snippet,
+                            "source_platform": self.PLATFORM_NAME,
+                        })
+                        if len(results) >= max_items:
+                            break
 
-                        if link.startswith("http") and "duckduckgo.com" not in link:
-                            results.append({
-                                "title": title,
-                                "url": link,
-                                "snippet": snippet,
-                                "source_platform": self.PLATFORM_NAME,
-                            })
-                            if len(results) >= max_items:
-                                break
+                # Fallback parser for standard DDG html if structure differs
+                if not results:
+                    result_elements = soup.find_all("div", class_=re.compile(r"result\s|results_links|result"))
+                    for res_elem in result_elements:
+                        title_elem = (
+                            res_elem.find("a", class_="result__url")
+                            or res_elem.find("a", class_="result__a")
+                            or res_elem.find("a")
+                        )
+                        snippet_elem = res_elem.find("a", class_="result__snippet") or res_elem.find(class_=re.compile(r"snippet"))
+                        if title_elem and title_elem.get("href"):
+                            link = self._clean_search_url(title_elem["href"])
+                            title = title_elem.get_text().strip()
+                            snippet = snippet_elem.get_text().strip() if snippet_elem else ""
+                            if link.startswith("http") and "duckduckgo.com" not in link:
+                                results.append({
+                                    "title": title,
+                                    "url": link,
+                                    "snippet": snippet,
+                                    "source_platform": self.PLATFORM_NAME,
+                                })
+                                if len(results) >= max_items:
+                                    break
 
                 if results:
                     status = "SEARCH_SUCCESS"
@@ -499,8 +516,10 @@ class GoogleSearchAdapter:
         limit = max_results or Config.MAX_SEARCH_RESULTS
         should_use_live = not Config.TEST_DISCOVERY if use_live_web is None else use_live_web
 
-        queries = self.query_builder.build_queries(keyword, max_queries=4)
-        logger.info(f"[{self.PLATFORM_NAME}] Executing {len(queries)} discovery queries for '{keyword}' (target max: {limit})")
+        # Scale discovery queries dynamically (run 6 to 16 diverse queries based on target limit)
+        num_queries = max(6, min(16, (limit // 3) + 3))
+        queries = self.query_builder.build_queries(keyword, max_queries=num_queries)
+        logger.info(f"[{self.PLATFORM_NAME}] Executing {len(queries)} diverse discovery queries for '{keyword}' (target max: {limit})")
 
         all_results: List[Dict[str, Any]] = []
         seen_urls = set()
@@ -517,7 +536,7 @@ class GoogleSearchAdapter:
                     items = cached_items
                     logger.info(f"[{self.PLATFORM_NAME}] Results retrieved from cache (5-min expiry)")
                 else:
-                    items = self._fetch_public_search(q, max_items=10)
+                    items = self._fetch_public_search(q, max_items=12)
                     self.cache.set(keyword, q, self.PLATFORM_NAME, items)
                     logger.info(f"[{self.PLATFORM_NAME}] Fresh results fetched and cached")
 

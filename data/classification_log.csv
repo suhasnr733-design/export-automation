@@ -1,1 +1,8 @@
 email,category,confidence,reason,classification_source,review_required,timestamp
+info@soundtopia.com,business,0.95,Generic info prefix on a custom domain associated with a commercial website and company name.,GEMINI,False,2026-08-19T13:11:35.269171+00:00
+business@besthimalaya.com,business,0.98,Email prefix specifically identifies as business on a custom domain with a commercial product collection website.,GEMINI,False,2026-08-19T13:11:35.269171+00:00
+export@singingbowlsspecialist.com,business,0.98,Export-specific email prefix on a custom domain associated with a commercial singing bowl website.,GEMINI,False,2026-08-19T13:11:35.269171+00:00
+info.samyakgroup@gmail.com,business,0.9,Email contains 'group' and 'info' identifiers and is linked to a commercial handmade goods website.,GEMINI,False,2026-08-19T13:11:35.269171+00:00
+info@indiancraftcentre.com,business,1.0,Company name explicitly identifies as a wholesaler and supplier with a corresponding custom domain.,GEMINI,False,2026-08-19T13:11:35.269171+00:00
+eg.sample@xyz.com,business,0.85,Listed on a B2B trade portal (TradeKey) under an importer and buyer category.,GEMINI,False,2026-08-19T13:11:35.269171+00:00
+akpotie@yahoo.com,business,0.8,"Despite the personal email provider, the record is sourced from a B2B trade portal directory for importers.",GEMINI,False,2026-08-19T13:11:35.269171+00:00

@@ -1,6 +1,6 @@
 /**
  * API 3 - EXPORT AUTOMATION SYSTEM
- * Frontend Application Scripts
+ * Modern SaaS Frontend Application Scripts
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       const term = e.target.value.toLowerCase().trim();
-      const rows = document.querySelectorAll('.data-table tbody tr');
+      const rows = document.querySelectorAll('.table tbody tr, .data-table tbody tr');
       rows.forEach((row) => {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(term) ? '' : 'none';
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (categoryFilter) {
     categoryFilter.addEventListener('change', (e) => {
       const filterVal = e.target.value.toLowerCase();
-      const rows = document.querySelectorAll('.data-table tbody tr');
+      const rows = document.querySelectorAll('.table tbody tr, .data-table tbody tr');
       rows.forEach((row) => {
         const cat = row.getAttribute('data-category') || '';
         if (!filterVal || filterVal === 'all' || cat.toLowerCase() === filterVal) {

@@ -1,73 +1,78 @@
 {% extends "base.html" %}
 
-{% block title %}Campaign History{% endblock %}
+{% block title %}Outreach Campaigns Registry{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:24px;">
   <div>
-    <h1 class="page-title">Outreach Campaigns Directory</h1>
-    <p class="page-subtitle">Track prepared, approved, and completed export outreach campaigns.</p>
+    <h1 class="page-title">Campaign Store</h1>
+    <p class="page-subtitle">Historical registry of all prepared, approved, and dispatched sales outreach batches.</p>
   </div>
   <div style="display:flex; gap:10px;">
-    <a href="{{ url_for('review_view') }}" class="btn btn-secondary" style="border-color:#8b5cf6; color:#c4b5fd;">🛡️ Review Leads</a>
-    <a href="{{ url_for('campaign_send_view') }}" class="btn btn-primary">➕ New Campaign</a>
+    <a href="{{ url_for('campaign_send_view') }}" class="btn btn-primary">
+      <span>➕</span> New Campaign Batch
+    </a>
   </div>
 </div>
 
-<div class="card">
-  <div class="card-header">
-    <h2 class="card-title">📋 Stored Campaign Batches</h2>
-    <span class="badge badge-secondary">{{ campaigns|length }} Campaigns</span>
+<div class="card" style="padding:0; overflow:hidden;">
+  <div class="card-header" style="padding:18px 24px; margin-bottom:0; background:rgba(15, 23, 42, 0.6);">
+    <h2 class="card-title" style="margin:0;"><span>📋</span> Stored Outreach Batches</h2>
+    <span class="badge badge-primary">{{ campaigns|length }} Total Campaigns</span>
   </div>
 
-  <div class="table-responsive">
-    <table class="data-table">
+  <div class="table-container" style="border:none; border-radius:0;">
+    <table class="table">
       <thead>
         <tr>
           <th>#</th>
-          <th>Campaign ID</th>
-          <th>Created Date</th>
-          <th>Audience</th>
-          <th>Status</th>
-          <th>Eligible / Total</th>
-          <th>Attachment</th>
-          <th>Actions</th>
+          <th>Campaign Identifier</th>
+          <th>Creation Timestamp</th>
+          <th>Audience Segment</th>
+          <th>Approval Status</th>
+          <th>Eligible Queue</th>
+          <th>Bound Attachment</th>
+          <th style="text-align:right;">Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for c in campaigns %}
         <tr>
           <td style="color:var(--text-muted);">{{ loop.index }}</td>
-          <td style="font-family:var(--font-mono); font-weight:600; color:#ffffff;">{{ c.campaign_id }}</td>
+          <td>
+            <code style="background:var(--bg-app); padding:2px 8px; border-radius:var(--radius-xs); color:#a5b4fc; font-weight:700; font-size:0.85rem;">{{ c.campaign_id }}</code>
+          </td>
           <td>{{ c.created_at[:19].replace('T', ' ') }} UTC</td>
-          <td><span class="badge badge-secondary">{{ c.target_audience|upper }}</span></td>
+          <td><span class="badge badge-primary">{{ c.target_audience|upper }}</span></td>
           <td>
             {% if c.status.value == 'COMPLETED' %}
-              <span class="badge badge-success">COMPLETED</span>
+              <span class="badge badge-success">✓ COMPLETED</span>
             {% elif c.status.value == 'APPROVED' %}
-              <span class="badge badge-info">APPROVED</span>
+              <span class="badge badge-info">✓ APPROVED</span>
             {% elif c.status.value == 'READY_FOR_REVIEW' %}
-              <span class="badge badge-warning">READY FOR REVIEW</span>
+              <span class="badge badge-warning">⏳ READY FOR REVIEW</span>
             {% elif c.status.value == 'FAILED' %}
-              <span class="badge badge-danger">FAILED</span>
+              <span class="badge badge-danger">✕ FAILED</span>
             {% else %}
               <span class="badge badge-secondary">{{ c.status.value }}</span>
             {% endif %}
           </td>
           <td>
-            <strong>{{ c.eligible_recipients }}</strong> / {{ c.total_recipients }}
+            <strong style="color:var(--text-main);">{{ c.eligible_recipients }}</strong> / {{ c.total_recipients }} Leads
           </td>
           <td>
-            <span style="font-size:0.8rem; color:var(--text-secondary);">{{ c.attachment_path.split('\\')[-1].split('/')[-1] }}</span>
+            <span style="font-size:0.8rem; color:var(--text-secondary);">📎 {{ c.attachment_path.split('\\')[-1].split('/')[-1] }}</span>
           </td>
-          <td>
-            <a href="{{ url_for('campaign_detail', campaign_id=c.campaign_id) }}" class="btn btn-secondary btn-sm">Details &rarr;</a>
+          <td style="text-align:right;">
+            <a href="{{ url_for('campaign_detail', campaign_id=c.campaign_id) }}" class="btn btn-secondary btn-sm">
+              Inspect &rarr;
+            </a>
           </td>
         </tr>
         {% else %}
         <tr>
           <td colspan="8" style="text-align:center; padding:3rem; color:var(--text-muted);">
-            No campaigns stored yet. Click <a href="{{ url_for('campaign_send_view') }}">New Campaign</a> to prepare one.
+            No campaigns stored yet. Go to <a href="{{ url_for('campaign_send_view') }}">Outreach Studio</a> to create one.
           </td>
         </tr>
         {% endfor %}

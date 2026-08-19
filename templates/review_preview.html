@@ -3,139 +3,151 @@
 {% block title %}Campaign Preview & Personalization Check{% endblock %}
 
 {% block content %}
-<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+<div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:24px;">
   <div>
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-      <h1 class="page-title" style="margin:0;">Campaign Outreach Preview</h1>
-      <span class="badge badge-success" style="font-size:0.85rem; padding:4px 10px; font-weight:800;">✓ APPROVED LEAD</span>
-      <span class="badge badge-warning" style="font-size:0.85rem; padding:4px 10px;">TEST SIMULATION ONLY</span>
-    </div>
-    <p class="page-subtitle">
-      Inspect the personalized email message and PDF attachment generated for <strong>{{ company_name }}</strong> before staging campaign execution.
-    </p>
+    <h1 class="page-title">Lead Campaign Preview</h1>
+    <p class="page-subtitle">Inspect the rendered email message and PDF attachment generated for <strong>{{ company_name }}</strong> before staging campaign execution.</p>
   </div>
   <div style="display:flex; gap:10px; align-items:center;">
     <a href="{{ url_for('review_view') }}" class="btn btn-secondary">← Return to Lead Review</a>
   </div>
 </div>
 
-<!-- Safety Notice Banner -->
-<div class="alert-box" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 24px; display:flex; align-items:center; gap:14px;">
-  <span style="font-size:1.6rem;">🔒</span>
-  <div>
-    <strong style="color: #34d399; text-transform:uppercase; letter-spacing:0.05em; font-size:0.85rem;">Safe Campaign Preview Gate</strong>
-    <p style="margin:2px 0 0; color:var(--text-secondary); font-size:0.875rem;">
-      This preview is strictly read-only and dispatches <strong>zero emails</strong>. Staging this lead will create a campaign in <code>READY_FOR_REVIEW</code> status, which requires an explicit second approval before any simulated execution.
-    </p>
+<!-- 4-Step Visual Stepper -->
+<div class="pipeline-stepper">
+  <div class="step-item completed">
+    <div class="step-circle">✓</div>
+    <div class="step-text">
+      <span class="step-label">Web Discovery</span>
+      <span class="step-desc">Target Crawled</span>
+    </div>
+  </div>
+  <span class="step-arrow">→</span>
+  <div class="step-item completed">
+    <div class="step-circle">✓</div>
+    <div class="step-text">
+      <span class="step-label">Lead Approved</span>
+      <span class="step-desc">Human Sign-off</span>
+    </div>
+  </div>
+  <span class="step-arrow">→</span>
+  <div class="step-item active">
+    <div class="step-circle">3</div>
+    <div class="step-text">
+      <span class="step-label">Campaign Staging</span>
+      <span class="step-desc">Ready to Stage</span>
+    </div>
+  </div>
+  <span class="step-arrow">→</span>
+  <div class="step-item">
+    <div class="step-circle">4</div>
+    <div class="step-text">
+      <span class="step-label">Safe Dispatch</span>
+      <span class="step-desc">Throttled Sending</span>
+    </div>
   </div>
 </div>
 
-<div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+<div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:24px; margin-bottom:28px;">
   
-  <!-- Left Column: Email Message Inspector -->
-  <div class="card" style="background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-lg); overflow:hidden;">
-    <div style="padding:16px 24px; background:var(--bg-surface-elevated); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
-      <h2 style="margin:0; font-size:1.1rem; font-weight:700;">Personalized Message Preview</h2>
-      <span class="badge badge-info" style="font-family:var(--font-mono); font-size:0.8rem;">MIME: text/plain; charset=UTF-8</span>
+  <!-- Left Column: Mac OS Styled Email Mockup -->
+  <div class="email-mockup">
+    <div class="mockup-header">
+      <div class="mac-dot red"></div>
+      <div class="mac-dot yellow"></div>
+      <div class="mac-dot green"></div>
+      <div style="margin-left:auto; font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">
+        OUTREACH SIMULATOR
+      </div>
     </div>
 
     <div style="padding:24px;">
       <!-- Email Header Fields -->
-      <div style="background:var(--bg-main); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-color); margin-bottom:20px; display:grid; grid-template-columns:100px 1fr; row-gap:10px; font-size:0.92rem;">
-        <div style="color:var(--text-secondary); font-weight:600;">To:</div>
+      <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-bottom:20px; display:grid; grid-template-columns:100px 1fr; row-gap:10px; font-size:0.9rem;">
+        <div style="color:var(--text-muted); font-weight:700;">To:</div>
         <div>
-          <code style="color:#60a5fa; font-weight:700;">{{ email }}</code>
-          <span style="color:var(--text-muted); margin-left:8px;">({{ company_name }})</span>
+          <code style="color:#93c5fd; font-weight:700;">{{ email }}</code>
+          <span style="color:var(--text-secondary); margin-left:8px;">({{ company_name }})</span>
         </div>
 
-        <div style="color:var(--text-secondary); font-weight:600;">From:</div>
+        <div style="color:var(--text-muted); font-weight:700;">From:</div>
         <div>
-          <span style="color:var(--text-primary);">Himalayan Export Collective &lt;exports@himalayanartisans.example.com&gt;</span>
+          <span style="color:var(--text-main);">Export Operations Desk &lt;exports@himalayanartisans.example.com&gt;</span>
         </div>
 
-        <div style="color:var(--text-secondary); font-weight:600;">Subject:</div>
+        <div style="color:var(--text-muted); font-weight:700;">Subject:</div>
         <div>
-          <strong style="color:#f8fafc; font-size:0.95rem;">{{ subject }}</strong>
+          <strong style="color:#ffffff; font-size:0.95rem;">{{ subject }}</strong>
         </div>
 
-        <div style="color:var(--text-secondary); font-weight:600;">Attachment:</div>
+        <div style="color:var(--text-muted); font-weight:700;">Attachment:</div>
         <div>
           {% if attachment_meta.is_valid %}
-            <span class="badge badge-success" style="font-family:var(--font-mono); font-size:0.82rem;">
+            <span class="badge badge-success" style="font-family:var(--font-mono); font-size:0.8rem;">
               📎 {{ attachment_meta.filename }} ({{ "%.1f"|format(attachment_meta.size_bytes / (1024*1024)) }} MB &bull; Validated PDF)
             </span>
           {% else %}
-            <span class="badge badge-danger" style="font-size:0.82rem;">
-              ⚠️ {{ attachment_meta.filename }} (Missing or Invalid)
+            <span class="badge badge-danger" style="font-size:0.8rem;">
+              ⚠️ {{ attachment_meta.filename }} (Missing)
             </span>
           {% endif %}
         </div>
       </div>
 
-      <!-- Email Body -->
-      <div style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; font-weight:600;">
+      <!-- Rendered Body -->
+      <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">
         Rendered Message Body:
       </div>
-      <div style="background:var(--bg-main); padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-color); font-family:var(--font-sans); line-height:1.7; font-size:0.92rem; color:var(--text-primary); white-space:pre-wrap;">{{ body }}</div>
+      <div style="background:rgba(255,255,255,0.02); padding:20px; border-radius:var(--radius-sm); border:1px solid var(--border-color); font-family:var(--font-sans); line-height:1.7; font-size:0.92rem; color:var(--text-main); white-space:pre-wrap;">{{ body }}</div>
     </div>
   </div>
 
-  <!-- Right Column: Verification Metadata & Stage Action -->
+  <!-- Right Column: Verification Checklist & Stage Action -->
   <div style="display:flex; flex-direction:column; gap:20px;">
     
-    <!-- Lead Verification Audit Card -->
-    <div class="card" style="background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px;">
-      <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:14px;">
-        Lead Verification Checklist
-      </h3>
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><span>📋</span> Lead Verification Details</h2>
+        <span class="badge badge-success">APPROVED</span>
+      </div>
 
-      <div style="display:flex; flex-direction:column; gap:10px; font-size:0.88rem;">
-        <div style="display:flex; justify-content:space-between;">
-          <span style="color:var(--text-secondary);">Human Review:</span>
-          <span class="badge badge-success" style="font-weight:700;">APPROVED</span>
+      <div style="display:flex; flex-direction:column; gap:12px; font-size:0.88rem;">
+        <div style="display:flex; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:var(--radius-xs);">
+          <span style="color:var(--text-muted);">Company Name:</span>
+          <strong style="color:var(--text-main);">{{ company_name }}</strong>
         </div>
-        <div style="display:flex; justify-content:space-between;">
-          <span style="color:var(--text-secondary);">Country Location:</span>
-          {% if is_country_unknown %}
-            <span class="badge badge-warning" style="font-size:0.8rem;">⚠️ {{ country_display }}</span>
-          {% else %}
-            <span style="color:var(--text-primary); font-weight:600;">{{ country_display }}</span>
-          {% endif %}
+        <div style="display:flex; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:var(--radius-xs);">
+          <span style="color:var(--text-muted);">Country Location:</span>
+          <strong style="color:var(--text-main);">🌍 {{ country_display }}</strong>
         </div>
-        <div style="display:flex; justify-content:space-between;">
-          <span style="color:var(--text-secondary);">Safe Fallback Used:</span>
-          <code style="color:#a78bfa;">{{ "international markets" if is_country_unknown else country_display }}</code>
+        <div style="display:flex; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:var(--radius-xs);">
+          <span style="color:var(--text-muted);">Target Website:</span>
+          <a href="{{ buyer.website }}" target="_blank" rel="noopener" style="color:var(--accent-cyan);">{{ buyer.website or '—' }} ↗</a>
         </div>
-        <div style="display:flex; justify-content:space-between;">
-          <span style="color:var(--text-secondary);">Website:</span>
-          <span style="color:var(--accent-primary);">{{ buyer.website or "None" }}</span>
-        </div>
-        <div style="display:flex; justify-content:space-between;">
-          <span style="color:var(--text-secondary);">Execution Mode:</span>
-          <span class="badge badge-warning" style="font-weight:700;">TEST SIMULATION</span>
+        <div style="display:flex; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:var(--radius-xs);">
+          <span style="color:var(--text-muted);">Mode:</span>
+          <span class="badge {% if config_data.TEST_MODE %}badge-warning{% else %}badge-success{% endif %}">
+            {% if config_data.TEST_MODE %}TEST SIMULATION{% else %}LIVE READY{% endif %}
+          </span>
         </div>
       </div>
     </div>
 
     <!-- Stage Campaign Action Card -->
-    <div class="card" style="background:var(--bg-surface-elevated); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px;">
-      <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:12px;">
-        Second Approval Gate Flow
+    <div class="card" style="border: 1px solid rgba(99, 102, 241, 0.4);">
+      <h3 style="font-size:0.95rem; font-weight:700; color:var(--text-main); margin-bottom:10px;">
+        Stage Campaign Execution
       </h3>
-      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;">
-        Staging this campaign will prepare a single-target campaign in <code>READY_FOR_REVIEW</code> status in the Campaign Store. You will be redirected to inspect and provide final sign-off before running the simulation.
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:18px;">
+        Staging this lead will create an outreach batch in <code>READY_FOR_REVIEW</code> status in the Campaign Store for your final approval.
       </p>
 
       <form action="{{ url_for('create_campaign_for_approved_lead') }}" method="POST">
         <input type="hidden" name="email" value="{{ email }}">
-        <button type="submit" class="btn btn-primary" style="width:100%; font-weight:700; padding:10px 16px; display:flex; justify-content:center; align-items:center; gap:8px;">
-          <span>📋</span> Stage Test Campaign
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+          <span>📋</span> Stage Campaign for {{ company_name }}
         </button>
       </form>
-
-      <div style="margin-top:12px; text-align:center;">
-        <a href="{{ url_for('review_view') }}" style="font-size:0.85rem; color:var(--text-muted);">Cancel and Return</a>
-      </div>
     </div>
 
   </div>

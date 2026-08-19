@@ -3,207 +3,210 @@
 {% block title %}Dashboard Overview{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<!-- Page Header -->
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:24px;">
   <div>
-    <h1 class="page-title">Export Sales Pipeline Dashboard</h1>
-    <p class="page-subtitle">Real-time metrics, buyer intelligence, and international outreach campaign status.</p>
+    <h1 class="page-title">Export Sales Pipeline</h1>
+    <p class="page-subtitle">Real-time buyer intelligence, qualification funnel, and automated outreach status.</p>
   </div>
-  <div style="display: flex; gap: 10px;">
-    <a href="{{ url_for('classify_view') }}" class="btn btn-secondary">🤖 AI Classify</a>
-    <a href="{{ url_for('review_view') }}" class="btn btn-secondary" style="border-color:#8b5cf6; color:#c4b5fd;">🛡️ Review Leads</a>
-    <a href="{{ url_for('campaign_send_view') }}" class="btn btn-primary">✉️ Prepare Campaign</a>
+  <div style="display:flex; gap:12px; align-items:center;">
+    <a href="{{ url_for('review_view') }}" class="btn btn-primary">
+      <span>🔍</span> Run Live Discovery
+    </a>
+    <a href="{{ url_for('campaign_send_view') }}" class="btn btn-secondary">
+      <span>✉️</span> Outreach Studio
+    </a>
   </div>
 </div>
 
-<!-- KPI Cards Grid -->
-<div class="kpi-grid">
-  <div class="kpi-card">
-    <div class="kpi-header">
-      <span class="kpi-label">Total Buyers</span>
-      <span class="kpi-icon">👥</span>
+<!-- 4-Step Visual Stepper -->
+<div class="pipeline-stepper">
+  <div class="step-item completed">
+    <div class="step-circle">1</div>
+    <div class="step-text">
+      <span class="step-label">Web Discovery</span>
+      <span class="step-desc">45+ Search Queries</span>
     </div>
-    <div class="kpi-value">{{ buyers_audit.total_records }}</div>
-    <div class="kpi-subtext">Verified in data/buyers.csv</div>
+  </div>
+  <span class="step-arrow">→</span>
+  <div class="step-item active">
+    <div class="step-circle">2</div>
+    <div class="step-text">
+      <span class="step-label">Lead Qualification</span>
+      <span class="step-desc">AI + Human Desk</span>
+    </div>
+  </div>
+  <span class="step-arrow">→</span>
+  <div class="step-item">
+    <div class="step-circle">3</div>
+    <div class="step-text">
+      <span class="step-label">Campaign Staging</span>
+      <span class="step-desc">Template & PDF Bind</span>
+    </div>
+  </div>
+  <span class="step-arrow">→</span>
+  <div class="step-item">
+    <div class="step-circle">4</div>
+    <div class="step-text">
+      <span class="step-label">Safe Dispatch</span>
+      <span class="step-desc">Throttled Delivery</span>
+    </div>
+  </div>
+</div>
+
+<!-- Modern Stat KPI Cards -->
+<div class="stats-grid">
+  <div class="stat-card" style="--stat-accent: #6366f1;">
+    <div class="stat-label">Total Discovered</div>
+    <div class="stat-value">{{ buyers_audit.total_records }}</div>
+    <div class="stat-helper">Master buyers directory</div>
   </div>
 
-  <div class="kpi-card">
-    <div class="kpi-header">
-      <span class="kpi-label">Valid Emails</span>
-      <span class="kpi-icon">✓</span>
-    </div>
-    <div class="kpi-value">{{ buyers_audit.unique_emails }}</div>
-    <div class="kpi-subtext">{{ buyers_audit.duplicate_emails }} duplicates filtered</div>
+  <div class="stat-card" style="--stat-accent: #06b6d4;">
+    <div class="stat-label">Qualified B2B Leads</div>
+    <div class="stat-value" style="color:#22d3ee;">{{ classified_emails.business|length }}</div>
+    <div class="stat-helper">Verified corporate inboxes</div>
   </div>
 
-  <div class="kpi-card biz">
-    <div class="kpi-header">
-      <span class="kpi-label">Business (B2B)</span>
-      <span class="kpi-icon">🏢</span>
-    </div>
-    <div class="kpi-value">{{ classified_emails.business|length }}</div>
-    <div class="kpi-subtext">Wholesale & buying desks</div>
+  <div class="stat-card" style="--stat-accent: #10b981;">
+    <div class="stat-label">Outreach Dispatched</div>
+    <div class="stat-value" style="color:#34d399;">{{ sent_audit.test_mode_records + sent_audit.successful_sends }}</div>
+    <div class="stat-helper">{% if config_data.TEST_MODE %}{{ sent_audit.test_mode_records }} simulated{% else %}{{ sent_audit.successful_sends }} live SMTP{% endif %}</div>
   </div>
 
-  <div class="kpi-card ind">
-    <div class="kpi-header">
-      <span class="kpi-label">Individual</span>
-      <span class="kpi-icon">👤</span>
-    </div>
-    <div class="kpi-value">{{ classified_emails.individual|length }}</div>
-    <div class="kpi-subtext">Independent practitioners</div>
-  </div>
-
-  <div class="kpi-card camp">
-    <div class="kpi-header">
-      <span class="kpi-label">Campaigns</span>
-      <span class="kpi-icon">📋</span>
-    </div>
-    <div class="kpi-value">{{ campaigns|length }}</div>
-    <div class="kpi-subtext">Structured outreach batches</div>
-  </div>
-
-  <div class="kpi-card test">
-    <div class="kpi-header">
-      <span class="kpi-label">Test Sends</span>
-      <span class="kpi-icon">🟡</span>
-    </div>
-    <div class="kpi-value">{{ sent_audit.test_mode_records }}</div>
-    <div class="kpi-subtext">Safe simulations logged</div>
-  </div>
-
-  <div class="kpi-card">
-    <div class="kpi-header">
-      <span class="kpi-label">Live Sends</span>
-      <span class="kpi-icon">🟢</span>
-    </div>
-    <div class="kpi-value">{{ sent_audit.successful_sends }}</div>
-    <div class="kpi-subtext">Real Gmail deliveries</div>
-  </div>
-
-  <div class="kpi-card fail">
-    <div class="kpi-header">
-      <span class="kpi-label">Failed / Errs</span>
-      <span class="kpi-icon">⚠️</span>
-    </div>
-    <div class="kpi-value">{{ sent_audit.failed_sends }}</div>
-    <div class="kpi-subtext">Delivery errors caught</div>
+  <div class="stat-card" style="--stat-accent: #f59e0b;">
+    <div class="stat-label">Active Campaigns</div>
+    <div class="stat-value" style="color:#fbbf24;">{{ campaigns|length }}</div>
+    <div class="stat-helper">Staged & executed batches</div>
   </div>
 </div>
 
 <!-- 2-Column Analytics Overview -->
-<div class="grid-2">
+<div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:24px; margin-bottom:28px;">
   
-  <!-- Left Card: Country & Source Breakdown -->
+  <!-- Left Column: Visual Conversion Funnel & Quick Trigger -->
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">🌍 International Audience Breakdown</h2>
-      <span class="card-subtitle">{{ buyers_audit.total_records }} Discovered Leads</span>
+      <h2 class="card-title"><span>📊</span> Lead Conversion Funnel</h2>
+      <span class="badge badge-primary">Real-time Metrics</span>
     </div>
 
-    <h3 style="font-size:0.9rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:12px;">Top Buyer Countries</h3>
-    {% if country_dist %}
-      {% for country, count in country_dist.items() %}
-      <div class="progress-container">
-        <div class="progress-header">
-          <span>{{ country }}</span>
-          <span style="color:#ffffff; font-weight:600;">{{ count }} buyers</span>
+    <!-- Visual Funnel Bars -->
+    <div style="display:flex; flex-direction:column; gap:16px; margin:16px 0 24px;">
+      
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:6px;">
+          <span style="font-weight:600; color:var(--text-main);">1. Web Search Candidates Collected</span>
+          <span style="font-weight:700; color:#a5b4fc;">{{ buyers_audit.total_records }} Leads (100%)</span>
         </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" style="width: {{ (count / buyers_audit.total_records * 100)|round }}%;"></div>
+        <div style="height:10px; background:rgba(255,255,255,0.06); border-radius:var(--radius-full); overflow:hidden;">
+          <div style="width:100%; height:100%; background:linear-gradient(90deg, #6366f1, #818cf8); border-radius:var(--radius-full);"></div>
         </div>
       </div>
-      {% endfor %}
-    {% else %}
-      <p style="color:var(--text-muted); font-size:0.85rem;">No country distribution data recorded.</p>
-    {% endif %}
 
-    <h3 style="font-size:0.9rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin:24px 0 12px 0;">Discovery Sources</h3>
-    {% for source, count in buyers_audit.platform_distribution.items() %}
-    <div class="progress-container">
-      <div class="progress-header">
-        <span>{{ source }}</span>
-        <span style="color:#ffffff; font-weight:600;">{{ count }} records</span>
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:6px;">
+          <span style="font-weight:600; color:var(--text-main);">2. Verified Commercial B2B Desks</span>
+          <span style="font-weight:700; color:#22d3ee;">
+            {{ classified_emails.business|length }} Leads ({% if buyers_audit.total_records %}{{ (classified_emails.business|length / buyers_audit.total_records * 100)|round|int }}%{% else %}0%{% endif %})
+          </span>
+        </div>
+        <div style="height:10px; background:rgba(255,255,255,0.06); border-radius:var(--radius-full); overflow:hidden;">
+          <div style="width:{% if buyers_audit.total_records %}{{ (classified_emails.business|length / buyers_audit.total_records * 100)|round|int }}%{% else %}0%{% endif %}; height:100%; background:linear-gradient(90deg, #06b6d4, #38bdf8); border-radius:var(--radius-full);"></div>
+        </div>
       </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" style="width: {{ (count / (buyers_audit.total_records or 1) * 100)|round }}%; background: var(--accent-info);"></div>
+
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:6px;">
+          <span style="font-weight:600; color:var(--text-main);">3. Outreach Dispatched / Simulated</span>
+          <span style="font-weight:700; color:#34d399;">
+            {{ sent_audit.test_mode_records + sent_audit.successful_sends }} Leads ({% if buyers_audit.total_records %}{{ ((sent_audit.test_mode_records + sent_audit.successful_sends) / buyers_audit.total_records * 100)|round|int }}%{% else %}0%{% endif %})
+          </span>
+        </div>
+        <div style="height:10px; background:rgba(255,255,255,0.06); border-radius:var(--radius-full); overflow:hidden;">
+          <div style="width:{% if buyers_audit.total_records %}{{ ((sent_audit.test_mode_records + sent_audit.successful_sends) / buyers_audit.total_records * 100)|round|int }}%{% else %}0%{% endif %}; height:100%; background:linear-gradient(90deg, #10b981, #34d399); border-radius:var(--radius-full);"></div>
+        </div>
       </div>
+
     </div>
-    {% endfor %}
+
+    <!-- Quick Action Launcher -->
+    <div style="background:var(--bg-app); padding:16px 20px; border-radius:var(--radius-sm); border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div>
+        <div style="font-size:0.9rem; font-weight:700; color:var(--text-main);">Ready to find new leads?</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Querying live web endpoints for <strong>{{ config_data.SEARCH_KEYWORD }}</strong></div>
+      </div>
+      <a href="{{ url_for('review_view') }}" class="btn btn-primary btn-sm">
+        <span>⚡</span> Launch Lead Discovery
+      </a>
+    </div>
   </div>
 
-  <!-- Right Card: Latest Campaign & System Health -->
+  <!-- Right Column: System Health & Active Campaign -->
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">⚡ System Health & Outreach Status</h2>
+      <h2 class="card-title"><span>🛡️</span> Security & System Health</h2>
       <span class="badge {% if config_data.TEST_MODE %}badge-warning{% else %}badge-success{% endif %}">
-        {% if config_data.TEST_MODE %}TEST MODE ACTIVE{% else %}LIVE READY{% endif %}
+        {% if config_data.TEST_MODE %}TEST SIMULATION{% else %}LIVE READY{% endif %}
       </span>
     </div>
 
-    <!-- Health Indicators List -->
-    <div style="display:flex; flex-direction:column; gap:14px; margin-bottom: 24px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(255,255,255,0.03); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
         <div>
-          <strong style="color:#ffffff;">Attachment File:</strong>
-          <div style="font-size:0.8rem; color:var(--text-secondary);">{{ attachment_meta.filename }} ({{ attachment_meta.size_kb }} KB)</div>
+          <div style="font-size:0.85rem; font-weight:600; color:var(--text-main);">PDF Company Catalog:</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">{{ attachment_meta.filename }} ({{ attachment_meta.size_kb }} KB)</div>
         </div>
         <span class="badge {% if attachment_meta.is_valid %}badge-success{% else %}badge-danger{% endif %}">
           {% if attachment_meta.is_valid %}VALIDATED{% else %}MISSING{% endif %}
         </span>
       </div>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(255,255,255,0.03); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
         <div>
-          <strong style="color:#ffffff;">Gemini AI Classifier:</strong>
-          <div style="font-size:0.8rem; color:var(--text-secondary);">{% if is_gemini_ready %}API Operational{% else %}Local Heuristic Engine Active (Safe Fallback){% endif %}</div>
+          <div style="font-size:0.85rem; font-weight:600; color:var(--text-main);">Discovery Engine:</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">DuckDuckGo Lite + Bing US Fallback</div>
         </div>
-        <span class="badge {% if is_gemini_ready %}badge-success{% else %}badge-secondary{% endif %}">
-          {% if is_gemini_ready %}CONNECTED{% else %}LOCAL TEST{% endif %}
+        <span class="badge badge-success">OPERATIONAL</span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(255,255,255,0.03); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+        <div>
+          <div style="font-size:0.85rem; font-weight:600; color:var(--text-main);">Email Protection Gate:</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">{% if config_data.TEST_MODE %}Safe Sandbox (Simulated Outgoing){% else %}Live Gmail SMTP Authenticated{% endif %}</div>
+        </div>
+        <span class="badge {% if config_data.TEST_MODE %}badge-warning{% else %}badge-success{% endif %}">
+          {% if config_data.TEST_MODE %}SANDBOX{% else %}LIVE READY{% endif %}
         </span>
       </div>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
-        <div>
-          <strong style="color:#ffffff;">Gmail SMTP Protection:</strong>
-          <div style="font-size:0.8rem; color:var(--text-secondary);">{% if is_gmail_ready %}Live SMTP Authenticated{% else %}Protected (Simulated Dispatch Mode){% endif %}</div>
-        </div>
-        <span class="badge {% if is_gmail_ready %}badge-success{% else %}badge-warning{% endif %}">
-          {% if is_gmail_ready %}LIVE READY{% else %}TEST PROTECTED{% endif %}
-        </span>
-      </div>
-
-      <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
-        <div>
-          <strong style="color:#ffffff;">Daily Send Quota:</strong>
-          <div style="font-size:0.8rem; color:var(--text-secondary);">Configured limit: {{ config_data.DAILY_SEND_LIMIT }} emails/day</div>
-        </div>
-        <span class="badge badge-info">LIMIT {{ config_data.DAILY_SEND_LIMIT }}</span>
-      </div>
     </div>
 
     <!-- Latest Campaign Card -->
     {% if latest_campaign %}
     <div style="border-top:1px solid var(--border-color); padding-top:16px;">
-      <h3 style="font-size:0.9rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:10px;">Latest Campaign Batch</h3>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span style="font-family:var(--font-mono); font-size:0.85rem; color:#ffffff;">{{ latest_campaign.campaign_id }}</span>
+        <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Latest Campaign Batch</span>
         <span class="badge {% if latest_campaign.status.value == 'COMPLETED' %}badge-success{% elif latest_campaign.status.value == 'APPROVED' %}badge-info{% elif latest_campaign.status.value == 'READY_FOR_REVIEW' %}badge-warning{% else %}badge-secondary{% endif %}">
           {{ latest_campaign.status.value }}
         </span>
       </div>
-      <div style="font-size:0.85rem; color:var(--text-secondary);">
-        Audience: <strong>{{ latest_campaign.target_audience|upper }}</strong> &bull; Total Candidates: <strong>{{ latest_campaign.total_recipients }}</strong> &bull; Eligible: <strong>{{ latest_campaign.eligible_recipients }}</strong>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <code style="color:#a5b4fc; font-size:0.85rem;">{{ latest_campaign.campaign_id }}</code>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">
+            Target: <strong>{{ latest_campaign.target_audience|upper }}</strong> &bull; {{ latest_campaign.eligible_recipients }} Recipients
+          </div>
+        </div>
+        <a href="{{ url_for('campaign_detail', campaign_id=latest_campaign.campaign_id) }}" class="btn btn-secondary btn-sm">
+          Details →
+        </a>
       </div>
-      <div style="margin-top:12px;">
-        <a href="{{ url_for('campaign_detail', campaign_id=latest_campaign.campaign_id) }}" class="btn btn-secondary btn-sm">View Campaign Details &rarr;</a>
-      </div>
-    </div>
-    {% else %}
-    <div style="border-top:1px solid var(--border-color); padding-top:16px; color:var(--text-muted); font-size:0.85rem;">
-      No campaigns created yet. Click <a href="{{ url_for('campaign_send_view') }}">Prepare Campaign</a> to initialize one.
     </div>
     {% endif %}
 
   </div>
+
 </div>
 {% endblock %}

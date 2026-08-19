@@ -1,14 +1,36 @@
 {
   "metadata": {
     "last_discovery_keyword": "Singing Bowls",
-    "last_discovery_timestamp": "2026-08-17T05:30:48.141716+00:00",
-    "total_provenance_records": 5
+    "last_discovery_timestamp": "2026-08-19T13:43:25.129720+00:00",
+    "total_provenance_records": 8
   },
   "records": {
+    "info@soundtopia.com": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-19T12:46:38.153671+00:00",
+      "source_platform": "Website Search",
+      "url": "https://www.soundtopia.com/",
+      "company_name": "Singing Bowls for Sale",
+      "country": "United States",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Discovered via keyword-aware web search"
+    },
+    "business@besthimalaya.com": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-19T12:46:38.153671+00:00",
+      "source_platform": "Website Search",
+      "url": "https://besthimalaya.com/collections/singing-bowls-in-usa",
+      "company_name": "Best Himalaya",
+      "country": "United States",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Discovered via keyword-aware web search"
+    },
     "export@singingbowlsspecialist.com": {
       "data_source": "LIVE_DISCOVERY",
       "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-17T03:44:49.613545+00:00",
+      "discovery_timestamp": "2026-08-19T12:46:38.153671+00:00",
       "source_platform": "Website Search",
       "url": "https://www.singingbowlusa.com/",
       "company_name": "Singingbowlusa",
@@ -16,46 +38,57 @@
       "relevance_decision": "ACCEPT",
       "relevance_reason": "Discovered via keyword-aware web search"
     },
-    "contact@singmeter.com": {
+    "info.samyakgroup@gmail.com": {
       "data_source": "LIVE_DISCOVERY",
       "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-17T05:04:21.139746+00:00",
+      "discovery_timestamp": "2026-08-19T12:46:38.153671+00:00",
       "source_platform": "Website Search",
-      "url": "https://www.singmeter.com/",
-      "company_name": "Contact SingMeter",
-      "country": "",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Discovered via keyword-aware web search"
-    },
-    "support@singmeter.com": {
-      "data_source": "LIVE_DISCOVERY",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-17T05:04:21.139746+00:00",
-      "source_platform": "Website Search",
-      "url": "https://www.singmeter.com/",
-      "company_name": "Contact SingMeter",
-      "country": "",
-      "relevance_decision": "ACCEPT",
-      "relevance_reason": "Discovered via keyword-aware web search"
-    },
-    "info@singarena.com": {
-      "data_source": "LIVE_DISCOVERY",
-      "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-17T05:04:21.139746+00:00",
-      "source_platform": "Website Search",
-      "url": "https://singarena.com/",
-      "company_name": "SingArena",
+      "url": "https://www.handmadesingingbowls.com/",
+      "company_name": "Handmade Singing Bowls",
       "country": "United States",
       "relevance_decision": "ACCEPT",
       "relevance_reason": "Discovered via keyword-aware web search"
     },
-    "atendimento@minhaconexao.com.br": {
+    "info@indiancraftcentre.com": {
       "data_source": "LIVE_DISCOVERY",
       "keyword": "Singing Bowls",
-      "discovery_timestamp": "2026-08-17T05:30:48.141716+00:00",
+      "discovery_timestamp": "2026-08-19T12:46:38.153671+00:00",
       "source_platform": "Website Search",
-      "url": "https://www.minhaconexao.com.br/",
-      "company_name": "Minha Conexão",
+      "url": "https://www.indiancraftcentre.com/",
+      "company_name": "Handmade Singing Bowls Online Wholesaler & Supplier in USA",
+      "country": "United States",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Discovered via keyword-aware web search"
+    },
+    "eg.sample@xyz.com": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-19T12:46:38.153671+00:00",
+      "source_platform": "Website Search",
+      "url": "https://importer.tradekey.com/singing-bowls-importer.html",
+      "company_name": "Singing Bowls Importers & Singing Bowls Buyers",
+      "country": "United States",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Discovered via keyword-aware web search"
+    },
+    "akpotie@yahoo.com": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-19T12:46:38.153671+00:00",
+      "source_platform": "Website Search",
+      "url": "https://importer.tradekey.com/singing-bowls-importer.html",
+      "company_name": "Singing Bowls Importers & Singing Bowls Buyers",
+      "country": "United States",
+      "relevance_decision": "ACCEPT",
+      "relevance_reason": "Discovered via keyword-aware web search"
+    },
+    "info@dharmashop.com": {
+      "data_source": "LIVE_DISCOVERY",
+      "keyword": "Singing Bowls",
+      "discovery_timestamp": "2026-08-19T13:43:25.129720+00:00",
+      "source_platform": "Website Search",
+      "url": "https://www.dharmashop.com/collections/wholesale-singing-bowls",
+      "company_name": "DharmaShop",
       "country": "",
       "relevance_decision": "ACCEPT",
       "relevance_reason": "Discovered via keyword-aware web search"

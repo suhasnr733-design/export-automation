@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 # Base Directory Resolution
 BASE_DIR = Path(__file__).resolve().parent
 
-# Load .env if present
-load_dotenv(dotenv_path=BASE_DIR / ".env")
+# Load .env if present — override=True ensures .env always wins over system env vars
+load_dotenv(dotenv_path=BASE_DIR / ".env", override=True)
 
 
 def _str_to_bool(val: str, default: bool = True) -> bool:
